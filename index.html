@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Café Bestellingen</title>
+<meta name="theme-color" content="#6a3df0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Café">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+@font-face{font-family:'Figtree';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/figtree-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/figtree-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/figtree-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:800;font-display:swap;src:url('fonts/figtree-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/fredoka-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/fredoka-latin-600-normal.woff2') format('woff2')}
+:root{
+  --ink:#1d1640; --ink-2:#5f5a7d; --ink-3:#938fb0;
+  --paper:#f7f4ff; --card:#ffffff; --line:#e3dcf7; --line-2:#efeafc;
+  --violet:#6a3df0; --violet-d:#5128d4; --violet-soft:#ece6ff;
+  --pink:#ff5c93; --pink-soft:#ffe6ef;
+  --amber:#b45309; --amber-bg:#fef3c7; --amber-bd:#fcd34d;
+  --blue:#1d4ed8; --blue-bg:#dbeafe; --blue-bd:#93c5fd;
+  --green:#15803d; --green-bg:#dcfce7; --green-bd:#86efac;
+  --grey:#57534e; --grey-bg:#f1efee; --grey-bd:#d6d3d1;
+  --red:#b91c1c; --red-bg:#fee2e2; --red-bd:#fca5a5; --red-solid:#dc2626;
+  --font-display:'Fredoka',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+  --font-body:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:.005em;line-height:1.15}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,textarea,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--violet);outline-offset:2px;border-radius:8px}
+.ic{width:1.1em;height:1.1em;flex:none;vertical-align:-.15em}
+.hidden{display:none!important}
+.muted{color:var(--ink-2)}
+.center{text-align:center}
+
+/* layout */
+.screen{height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;padding-top:env(safe-area-inset-top)}
+.scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+.wrap{max-width:640px;margin:0 auto;padding:12px 14px 24px}
+.wrap-wide{max-width:1040px;margin:0 auto;padding:20px 16px 40px}
+
+/* bunting (the one memorable element) */
+.bunting{height:24px;flex:none;position:relative;overflow:hidden}
+.bunting::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--ink);opacity:.18}
+.bunting i{position:absolute;top:2px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:20px solid var(--c);transform-origin:50% 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;flex:none;background:var(--paper)}
+.topbar .l{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{background:var(--violet);color:#fff;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;font-size:18px}
+.topbar h1{font-size:1.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--ink);font-size:20px}
+.iconbtn:hover{background:var(--violet-soft)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 18px;border-radius:12px;font-weight:700;border:2px solid transparent;transition:transform .08s,background .15s,border-color .15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn-primary{background:var(--violet);color:#fff}
+.btn-primary:hover{background:var(--violet-d)}
+.btn-pink{background:var(--pink);color:#fff}
+.btn-out{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn-out:hover{border-color:var(--violet);color:var(--violet)}
+.btn-ghost{color:var(--ink-2)}
+.btn-ghost:hover{background:var(--violet-soft)}
+.btn-danger{background:var(--red-solid);color:#fff}
+.btn-danger-out{background:#fff;border-color:var(--red-bd);color:var(--red)}
+.btn-danger-out:hover{background:var(--red-bg)}
+.btn-green{background:#16a34a;color:#fff}
+.btn-blue{background:#2563eb;color:#fff}
+.btn-sm{min-height:34px;padding:0 12px;font-size:.85rem;border-radius:10px}
+.btn-lg{min-height:50px;font-size:1.05rem;border-radius:14px}
+.btn-block{width:100%}
+.btn-sq{min-height:32px;width:32px;padding:0;border-radius:9px}
+
+/* inputs */
+.field label{display:block;font-size:.78rem;font-weight:700;color:var(--ink-2);margin:0 0 4px 2px}
+.input,.select,.textarea{width:100%;background:#fff;border:2px solid var(--line);border-radius:12px;padding:0 14px;min-height:44px;transition:border-color .15s}
+.textarea{padding:10px 14px;min-height:110px;resize:vertical}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--violet)}
+.input.err{border-color:var(--red-solid)}
+.input.pin{text-align:center;font-size:1.6rem;letter-spacing:.4em;font-family:var(--font-display)}
+.stack>*+*{margin-top:12px}
+.row{display:flex;align-items:center;gap:8px}
+.row.wrap-r{flex-wrap:wrap}
+.between{justify-content:space-between}
+
+/* cards */
+.card{background:var(--card);border:2px solid var(--line-2);border-radius:18px;padding:16px}
+.card h3{font-size:1.1rem;margin-bottom:12px}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:.74rem;font-weight:700;border:1.5px solid}
+.b-pending{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-bd)}
+.b-making{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd)}
+.b-ready{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.b-served{background:var(--grey-bg);color:var(--grey);border-color:var(--grey-bd)}
+.b-declined{background:var(--red-bg);color:var(--red);border-color:var(--red-bd)}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:700;border:1.5px solid}
+.pill-ice{background:#e0f2fe;color:#0369a1;border-color:#7dd3fc}
+.pill-bub{background:var(--violet-soft);color:var(--violet-d);border-color:#c4b3fa}
+.count{background:var(--red-solid);color:#fff;border-radius:999px;font-size:.75rem;font-weight:800;min-width:22px;height:22px;display:inline-grid;place-items:center;padding:0 6px}
+.count.orange{background:#f97316}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+
+/* hero / gate */
+.gate{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.gate .box{width:100%;max-width:360px;text-align:center}
+.gate .big{width:72px;height:72px;border-radius:24px;background:var(--violet);color:#fff;display:grid;place-items:center;margin:0 auto 18px;font-size:34px;transform:rotate(-6deg);box-shadow:5px 5px 0 var(--pink)}
+.gate h2{font-size:1.9rem;margin-bottom:8px}
+.gate p{color:var(--ink-2);margin-bottom:20px}
+.closed .disc{width:120px;height:120px;border-radius:50%;background:var(--violet-soft);display:grid;place-items:center;font-size:52px;margin:0 auto 20px}
+
+/* drinks */
+.hello{text-align:center;margin:4px 0 12px}
+.hello h2{font-size:1.8rem;color:var(--violet)}
+.hello p{font-size:.85rem;color:var(--ink-2);font-weight:600}
+.filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 6px}
+.chip{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:0 12px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:700;font-size:.8rem}
+.chip.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.group-title{font-size:.8rem;font-weight:800;color:var(--ink-3);margin:16px 2px 8px}
+.group-title.star{color:var(--pink)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}}
+.drink{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:128px;padding:14px 8px;background:#fff;border:2px solid var(--line);border-radius:20px;text-align:center;transition:transform .1s,border-color .15s,box-shadow .15s}
+.drink:hover{border-color:#c4b3fa}
+.drink:active{transform:scale(.97)}
+.drink .em{width:52px;height:52px;border-radius:50%;background:var(--violet-soft);display:grid;place-items:center;font-size:28px;transition:transform .2s}
+.drink:hover .em{transform:translateY(-3px) rotate(-6deg)}
+.drink .nm{font-weight:700;font-size:.95rem;line-height:1.2}
+.drink .pr{font-size:.72rem;font-weight:800;background:var(--pink-soft);color:#c2185b;border-radius:999px;padding:1px 9px}
+.drink.sel{border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft),4px 4px 0 var(--violet)}
+.drink.sel .em{background:var(--violet);}
+.drink .tick{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--pink);color:#fff;display:grid;place-items:center;font-size:12px}
+
+/* basket bar */
+.bar{flex:none;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:2px solid var(--line-2);display:flex;justify-content:center}
+.bar .btn{min-width:220px}
+
+/* drawer */
+.backdrop{position:fixed;inset:0;background:rgba(29,22,64,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.backdrop.side{padding:0;justify-content:flex-start;align-items:stretch}
+@keyframes fade{from{opacity:0}}
+.anim .backdrop{animation:fade .15s}
+.anim .modal{animation:rise .2s ease-out}
+.anim .drawer{animation:slide .2s ease-out}
+.drawer{width:290px;max-width:85vw;background:var(--paper);height:100%;display:flex;flex-direction:column;box-shadow:8px 0 30px rgba(29,22,64,.25)}
+@keyframes slide{from{transform:translateX(-100%)}}
+.drawer header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:2px solid var(--line-2)}
+.menu-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:14px}
+.menu-item:hover{background:var(--violet-soft)}
+.menu-item .mi{width:36px;height:36px;border-radius:11px;background:var(--violet-soft);color:var(--violet);display:grid;place-items:center;flex:none;font-size:18px}
+.menu-item b{display:block;font-size:.92rem}
+.menu-item small{color:var(--ink-2);font-size:.76rem}
+
+/* modal */
+.modal{background:#fff;border-radius:22px;width:100%;max-width:420px;max-height:calc(100dvh - 32px);overflow:auto;padding:20px;box-shadow:0 20px 60px rgba(29,22,64,.35)}
+.modal.wide{max-width:460px}
+@keyframes rise{from{transform:translateY(14px);opacity:0}}
+.modal h3{font-size:1.3rem;margin-bottom:4px}
+.modal .x{float:right;margin:-6px -8px 0 0}
+.modal.alertbox{padding:0;overflow:hidden;border:3px solid var(--red-bd)}
+.alertbox .hd{background:var(--red-solid);color:#fff;padding:18px 20px;display:flex;gap:12px;align-items:center}
+.alertbox .hd small{display:block;font-size:.72rem;font-weight:700;opacity:.85}
+.alertbox .hd h3{margin:0;font-size:1.5rem}
+.alertbox .bd{padding:20px}
+.reason{background:var(--red-bg);border:2px solid var(--red-bd);border-radius:14px;padding:12px 14px;margin:12px 0}
+.reason small{display:block;font-size:.72rem;font-weight:800;color:var(--red)}
+.reason p{color:#7f1d1d;font-weight:700}
+
+/* option tiles */
+.opts{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.opts.one{grid-template-columns:1fr}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border-radius:16px;border:2px solid var(--line);background:#fff;color:var(--ink-2)}
+.tile .big{font-size:28px;line-height:1}
+.tile b{color:var(--ink);font-size:.9rem}
+.tile small{font-size:.72rem}
+.tile.on.ice{border-color:#38bdf8;background:#f0f9ff}
+.tile.on.bub{border-color:var(--violet);background:var(--violet-soft)}
+.tile.locked{cursor:default}
+.tile .lk{position:absolute;top:8px;right:8px;font-size:12px;color:var(--ink-3)}
+
+/* track */
+.search{position:relative}
+.search .ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:20px}
+.search .input{padding-left:44px;min-height:54px;font-size:1.05rem;border-radius:16px}
+.order{display:flex;gap:12px;background:#fff;border:2px solid var(--line-2);border-radius:18px;padding:14px}
+.order.dec{opacity:.8;padding:10px 14px}
+.order .em{width:44px;height:44px;border-radius:14px;background:var(--violet-soft);display:grid;place-items:center;font-size:22px;flex:none}
+.order h3{font-size:1.1rem}
+.order .note{color:var(--violet-d);font-style:italic;font-weight:600;font-size:.9rem;margin-top:2px}
+.order .meta{font-size:.75rem;color:var(--ink-3);margin-top:3px}
+.empty{text-align:center;padding:40px 20px;border:2px dashed var(--line);border-radius:22px;color:var(--ink-2)}
+.empty .e{font-size:40px;margin-bottom:6px}
+.empty h3{color:var(--ink);margin-bottom:4px}
+
+/* staff */
+.s-head{background:#fff;border-bottom:2px solid var(--line-2);padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;flex:none}
+.s-head h1{font-size:1.3rem;cursor:pointer}
+.ocards{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:700px){.ocards{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.ocards{grid-template-columns:repeat(3,1fr)}}
+.ocard{background:#fff;border:2px solid var(--line-2);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ocard.dec{padding:12px;gap:8px;opacity:.82}
+.ocard .mid{border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);padding:10px 0}
+.ocard .nt{margin-top:8px;font-size:.88rem;background:var(--paper);border-radius:10px;padding:8px 10px;font-style:italic;color:var(--ink-2)}
+.mono{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:.75rem}
+.sgrid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:700px){.sgrid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.sgrid{grid-template-columns:repeat(3,1fr)}}
+.sec-title{font-size:1.6rem;margin:28px 0 12px}
+.mode{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:800;border-radius:10px;border:2px solid var(--line);padding:5px 10px;background:#fff;color:var(--ink-3)}
+.mode.on{background:var(--violet);color:#fff;border-color:var(--violet)}
+.mode.locked{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-bd)}
+.drow{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;border:2px solid var(--line-2);background:#fff;position:relative}
+.drow .grip{touch-action:none;cursor:grab;color:var(--ink-3);padding:6px 4px;border-radius:8px;font-size:18px}
+.drow .grip:hover{background:var(--violet-soft)}
+.drow.dragging{z-index:5;box-shadow:0 12px 30px rgba(29,22,64,.25);border-color:var(--violet);background:#fff;transition:none!important}
+.drow:not(.dragging){transition:transform .15s}
+.drow .dn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem}
+.drow .dn span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drow .ctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pricebtn{display:inline-flex;align-items:center;gap:2px;font-size:.78rem;font-weight:800;border-radius:9px;border:2px solid var(--line);padding:4px 9px;background:#fff;color:var(--ink-3)}
+.pricebtn.has{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+.priceedit{width:78px;border:2px solid var(--violet);border-radius:9px;padding:4px 8px;font-weight:700;font-size:.85rem}
+.dlist{display:grid;gap:8px}
+.fb{border:2px solid var(--line-2);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.fb.unread{border-color:#c4b3fa;background:#fff}
+.fb.read{opacity:.6;background:var(--paper)}
+.fb.help.unread{border-color:#fdba74;background:#fff7ed}
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem}
+.tbl th{text-align:left;font-size:.72rem;color:var(--ink-3);padding:6px 8px 6px 0;border-bottom:2px solid var(--line-2)}
+.tbl td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line-2)}
+.tbl .r{text-align:right}
+.sum{display:flex;justify-content:space-between;padding:8px 12px;border-radius:12px;background:var(--paper);font-weight:700;font-size:.9rem}
+.sum.total{background:var(--green-bg);color:var(--green)}
+.sum.pay{background:var(--violet-soft);color:var(--violet-d)}
+.login{min-height:100dvh;display:grid;place-items:center;padding:20px}
+.login .card{max-width:380px;width:100%;padding:28px}
+
+/* rooms */
+.rooms{display:grid;gap:12px}
+.room{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:20px;padding:14px 16px;transition:transform .1s,border-color .15s}
+.room:hover{border-color:#c4b3fa}.room:active{transform:scale(.98)}
+.room .num{width:48px;height:48px;border-radius:16px;background:var(--violet);color:#fff;display:grid;place-items:center;font-family:var(--font-display);font-size:1.5rem;font-weight:600;box-shadow:3px 3px 0 var(--pink);flex:none}
+.room .rt{flex:1;min-width:0}.room .rt b{display:block;font-family:var(--font-display);font-size:1.15rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room .rt small{color:var(--ink-2);font-size:.8rem}
+.secret{position:fixed;right:0;bottom:0;width:64px;height:64px;opacity:0;background:transparent;z-index:5}
+.secret.in-drawer{position:absolute;width:56px;height:56px}
+.drawer{position:relative}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;font-weight:600;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:1px;accent-color:var(--violet);flex:none}
+
+/* toasts */
+#toasts{position:fixed;left:0;right:0;top:12px;z-index:100;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 12px}
+.toast{background:var(--ink);color:#fff;border-radius:14px;padding:12px 16px;max-width:380px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:rise .2s}
+.toast b{display:block}
+.toast span{font-size:.85rem;opacity:.85}
+.toast.bad{background:var(--red-solid)}
+
+/* watch */
+.watch-page{min-height:100dvh;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-family:system-ui,sans-serif}
+.watch-fixed{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif}
+.bezel{padding:12px;border-radius:50%;background:linear-gradient(160deg,#2c2c2c,#181818);box-shadow:0 0 0 1px #111,0 0 0 3px #2a2a2a,0 24px 80px rgba(0,0,0,.9),inset 0 1px 0 #444}
+.face{width:360px;height:360px;border-radius:50%;overflow:hidden;background:#000;position:relative;color:#fff}
+.watch-fixed .face{transform:scale(calc(100vmin / 360px));transform-origin:center}
+.face .abs{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center}
+.face button{color:#fff}
+.keys{display:grid;grid-template-columns:repeat(3,76px);gap:5px 6px}
+.key{width:76px;height:50px;background:#1c1c1c;border:1px solid #2e2e2e;border-radius:14px;font-size:21px;font-weight:600;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:manipulation}
+.key.del{background:transparent;border:0;font-size:18px}
+.dots{display:flex;gap:10px;margin-bottom:16px}
+.dots i{width:11px;height:11px;border-radius:50%;border:2px solid #444;transition:all .15s}
+.dots i.f{background:#fff;border-color:#fff}
+.dots.err i{border-color:#ef4444}.dots.err i.f{background:#ef4444}
+.wcard{justify-content:center;cursor:pointer;user-select:none;touch-action:manipulation}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts"></div>
+<script>
+(() => {
+'use strict';
+
+/* ════════════════════════════════════════════════════════════════
+   1. DATABASE-LAAG
+   ----------------------------------------------------------------
+   Alle gegevens staan in Supabase en lopen via het object `DB`.
+   ════════════════════════════════════════════════════════════════ */
+/* ── Verbinding met Supabase (pas dit aan als je project verandert) ── */
+const SUPABASE_URL = 'https://lgysewiliaxlqrzeizts.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_3ecVyHum4ZfYIcmcHGbyPQ_yu_Isc0N';
+
+async function sb(path, {method = 'GET', body, single = false} = {}) {
+  const headers = {apikey:SUPABASE_KEY, 'Content-Type':'application/json'};
+  if (method !== 'GET') headers.Prefer = 'return=representation';
+  let res;
+  try { res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {method, headers, body:body ? JSON.stringify(body) : undefined}); }
+  catch { throw new Error('Geen verbinding met de database. Controleer je internet.'); }
+  if (res.status === 404) throw new Error('De database is nog niet bijgewerkt. Voer het SQL-script uit in Supabase.');
+  if (!res.ok) {
+    let msg = ''; try { msg = (await res.json()).message || ''; } catch {}
+    throw new Error(msg || `Databasefout (${res.status})`);
+  }
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : [];
+  return single ? data[0] : data;
+}
+
+const enc = encodeURIComponent;
+const DB = (() => {
+  const now = () => new Date().toISOString();
+  const mapOrder = r => ({id:r.id, customerName:r.customer_name, drink:r.drink, status:r.status, notes:r.notes, deviceId:r.device_id,
+    withIce:r.with_ice, withBubbles:r.with_bubbles, declineReason:r.decline_reason, createdAt:r.created_at});
+  const mapDrink = r => ({id:r.id, name:r.name, icon:r.icon, iceAvailable:r.ice_available, bubblesAvailable:r.bubbles_available,
+    sortOrder:r.sort_order, priceInCents:r.price_in_cents, createdAt:r.created_at});
+  const CFG_COLS = 'id,cafe_name,multi_drink_mode,ordering_open,locked,require_approval,session_start,session_end,host_name';
+  const REQ_COLS = 'id,first_name,email,start_at,end_at,require_approval,device_id,status,applied,created_at';
+  const mapConfig = r => ({id:r.id, cafeName:r.cafe_name, multiDrinkMode:r.multi_drink_mode, orderingOpen:r.ordering_open,
+    locked:!!r.locked, requireApproval:!!r.require_approval, sessionStart:r.session_start || null, sessionEnd:r.session_end || null, hostName:r.host_name || null});
+  const mapFeed = r => ({id:r.id, content:r.content, read:r.read_at, createdAt:r.created_at});
+  const mapHelp = r => ({id:r.id, customerName:r.customer_name, read:r.read_at, createdAt:r.created_at});
+  const mapAccess = r => ({id:r.id, personName:r.person_name, deviceId:r.device_id, status:r.status, createdAt:r.created_at});
+  const mapReq = r => ({id:r.id, firstName:r.first_name, email:r.email || '', startAt:r.start_at, endAt:r.end_at, requireApproval:!!r.require_approval,
+    deviceId:r.device_id, status:r.status, applied:!!r.applied, createdAt:r.created_at});
+  const ID = id => `id=eq.${Number(id)}`;
+
+  return {
+    /* staff=true: ook feedback, hulpverzoeken en alle toegangsverzoeken · main=true: alle kamer-aanvragen */
+    async getSnapshot({staff = false, main = false, deviceId = null} = {}) {
+      const dev = deviceId ? enc(deviceId) : '';
+      const [cfg, drinks, orders, feedback, help, access, reqs] = await Promise.all([
+        sb(`config?id=eq.1&select=${CFG_COLS}`),
+        sb('drinks?select=*&order=sort_order.asc,id.asc'),
+        sb('orders?select=*&order=id.asc'),
+        staff ? sb('feedback?select=*&order=id.asc') : [],
+        staff ? sb('help_requests?select=*&order=id.asc') : [],
+        staff ? sb('room_access?select=*&order=id.asc') : (dev ? sb(`room_access?device_id=eq.${dev}&select=*&order=id.asc`) : []),
+        main ? sb(`room_requests?select=${REQ_COLS}&order=id.asc`) : (dev ? sb(`room_requests?device_id=eq.${dev}&select=${REQ_COLS}&order=id.asc`) : []),
+      ]);
+      if (!cfg.length) throw new Error('Tabel "config" is leeg. Voer het SQL-script uit in Supabase.');
+      return {config:mapConfig(cfg[0]), drinks:drinks.map(mapDrink), orders:orders.map(mapOrder), feedback:feedback.map(mapFeed),
+        helpRequests:help.map(mapHelp), access:access.map(mapAccess), roomRequests:reqs.map(mapReq)};
+    },
+
+    /* ── bestellingen ── */
+    async createOrder({customerName, drink, notes, deviceId, withIce, withBubbles}) {
+      const name = String(customerName || '').trim();
+      if (!name) throw new Error('Voer eerst je naam in.');
+      return mapOrder(await sb('orders', {method:'POST', single:true, body:{
+        customer_name:name, drink, status:'pending', notes:(notes || '').trim() || null,
+        device_id:deviceId || null, with_ice:!!withIce, with_bubbles:!!withBubbles}}));
+    },
+    async updateOrder(id, patch) {
+      const b = {};
+      if ('drink' in patch) b.drink = patch.drink;
+      if ('notes' in patch) b.notes = (patch.notes || '').trim() || null;
+      if ('withIce' in patch) b.with_ice = !!patch.withIce;
+      if ('withBubbles' in patch) b.with_bubbles = !!patch.withBubbles;
+      const r = await sb(`orders?${ID(id)}`, {method:'PATCH', body:b});
+      if (!r.length) throw new Error('Bestelling niet gevonden.');
+      return mapOrder(r[0]);
+    },
+    async updateOrderStatus(id, status, declineReason) {
+      const r = await sb(`orders?${ID(id)}`, {method:'PATCH', body:{status, decline_reason:status === 'declined' ? ((declineReason || '').trim() || null) : null}});
+      if (!r.length) throw new Error('Bestelling niet gevonden.');
+      return mapOrder(r[0]);
+    },
+    async deleteOrder(id) { await sb(`orders?${ID(id)}`, {method:'DELETE'}); },
+    async clearAllOrders() { await sb('orders?id=gt.0', {method:'DELETE'}); },
+
+    /* ── drankjes ── */
+    async createDrink({name, icon, iceAvailable, bubblesAvailable}) {
+      const n = String(name || '').trim();
+      if (!n) throw new Error('Geef het drankje een naam.');
+      const existing = await sb('drinks?select=name,sort_order');
+      if (existing.some(x => x.name.toLowerCase() === n.toLowerCase())) throw new Error('Dit drankje bestaat al.');
+      const max = existing.reduce((m, x) => Math.max(m, x.sort_order), -1);
+      return mapDrink(await sb('drinks', {method:'POST', single:true, body:{
+        name:n, icon:icon || 'CupSoda', ice_available:iceAvailable || 'on', bubbles_available:bubblesAvailable || 'on', sort_order:max + 1}}));
+    },
+    async updateDrink(id, patch) {
+      const b = {};
+      if ('iceAvailable' in patch) b.ice_available = patch.iceAvailable;
+      if ('bubblesAvailable' in patch) b.bubbles_available = patch.bubblesAvailable;
+      if ('priceInCents' in patch) b.price_in_cents = patch.priceInCents;
+      const r = await sb(`drinks?${ID(id)}`, {method:'PATCH', body:b});
+      if (!r.length) throw new Error('Drankje niet gevonden.');
+      return mapDrink(r[0]);
+    },
+    async reorderDrinks(ids) { await Promise.all(ids.map((id, i) => sb(`drinks?${ID(id)}`, {method:'PATCH', body:{sort_order:i}}))); },
+    async deleteDrink(id) { await sb(`drinks?${ID(id)}`, {method:'DELETE'}); },
+
+    /* ── kamer-instellingen (standaard: de huidige kamer) ── */
+    async updateConfig(patch) {
+      const b = {};
+      if ('cafeName' in patch) {
+        const n = String(patch.cafeName || '').trim(); if (!n) throw new Error('Geef het café een naam.');
+        b.cafe_name = n;
+      }
+      if ('staffCode' in patch) {   // wordt alleen geschreven, nooit teruggelezen
+        if (!/^\d{4}$/.test(patch.staffCode)) throw new Error('De code moet uit 4 cijfers bestaan.');
+        b.staff_code = patch.staffCode;
+      }
+      if ('multiDrinkMode' in patch) b.multi_drink_mode = patch.multiDrinkMode;
+      if ('orderingOpen' in patch) b.ordering_open = !!patch.orderingOpen;
+      if ('locked' in patch) b.locked = !!patch.locked;
+      if ('requireApproval' in patch) b.require_approval = !!patch.requireApproval;
+      if ('sessionStart' in patch) b.session_start = patch.sessionStart;
+      if ('sessionEnd' in patch) b.session_end = patch.sessionEnd;
+      if ('hostName' in patch) b.host_name = patch.hostName;
+      return mapConfig((await sb(`config?id=eq.1&select=${CFG_COLS}`, {method:'PATCH', body:b}))[0]);
+    },
+    async clearRoomData() {
+      await Promise.all(['orders', 'feedback', 'help_requests', 'room_access'].map(t => sb(`${t}?id=gt.0`, {method:'DELETE'})));
+    },
+
+    /* ── feedback & hulpverzoeken ── */
+    async createFeedback(content) {
+      const c = String(content || '').trim(); if (!c) throw new Error('Schrijf eerst je feedback.');
+      await sb('feedback', {method:'POST', body:{content:c}});
+    },
+    async markFeedbackRead(id) { await sb(`feedback?${ID(id)}`, {method:'PATCH', body:{read_at:now()}}); },
+    async deleteFeedback(id) { await sb(`feedback?${ID(id)}`, {method:'DELETE'}); },
+    async createHelpRequest(customerName) {
+      const n = String(customerName || '').trim(); if (!n) throw new Error('Voer je naam in.');
+      await sb('help_requests', {method:'POST', body:{customer_name:n}});
+    },
+    async markHelpRead(id) { await sb(`help_requests?${ID(id)}`, {method:'PATCH', body:{read_at:now()}}); },
+    async deleteHelp(id) { await sb(`help_requests?${ID(id)}`, {method:'DELETE'}); },
+
+    /* ── toegang tot een kamer (goedkeuring van nieuwe bezoekers) ── */
+    async createAccess(personName, deviceId) {
+      await sb('room_access', {method:'POST', body:{person_name:String(personName).trim(), device_id:deviceId, status:'pending'}});
+    },
+    async updateAccess(id, status) { await sb(`room_access?${ID(id)}`, {method:'PATCH', body:{status}}); },
+
+    /* ── gratis kamer aanvragen (hoofdadmin) ── */
+    async createRoomRequest({firstName, email, code, startAt, endAt, requireApproval, deviceId}) {
+      await sb('room_requests?select=id', {method:'POST', body:{first_name:firstName.trim(), email:email.trim(), requested_code:code, start_at:startAt, end_at:endAt,
+        require_approval:!!requireApproval, device_id:deviceId, status:'pending'}});
+    },
+    async updateRoomRequest(id, patch) { await sb(`room_requests?${ID(id)}&select=id`, {method:'PATCH', body:patch}); },
+    async deleteRoomRequest(id) { await sb(`room_requests?${ID(id)}&select=id`, {method:'DELETE'}); },
+    /* 'Mijn gegevens verwijderen': alles wat bij dit apparaat/deze naam hoort */
+    async deleteMyData(deviceId, name) {
+      const dev = enc(deviceId), nowIso = enc(new Date().toISOString());
+      await Promise.all([
+        sb(`orders?device_id=eq.${dev}`, {method:'DELETE'}),
+        sb(`room_access?device_id=eq.${dev}`, {method:'DELETE'}),
+        sb(`room_requests?device_id=eq.${dev}&status=in.(pending,denied,stopped)&select=id`, {method:'DELETE'}),
+        sb(`room_requests?device_id=eq.${dev}&status=eq.approved&end_at=lt.${nowIso}&select=id`, {method:'DELETE'}),
+        name ? sb(`help_requests?customer_name=eq.${enc(name)}`, {method:'DELETE'}) : null,
+      ]);
+    },
+
+    /* ── code vergeten & hoofdcode ── */
+    async createCodeRequest() { await sb('code_requests', {method:'POST', body:{}}); },
+    /* codes worden op de server gecontroleerd; de app krijgt ze nooit te zien */
+    async checkStaffCode(code) { return (await sb('rpc/check_staff_code', {method:'POST', body:{p_code:String(code)}})) === true; },
+    async checkMainCode(code) { return (await sb('rpc/check_main_code', {method:'POST', body:{p_code:String(code)}})) === true; },
+    async applyDueSessions() { await sb('rpc/apply_due_sessions', {method:'POST', body:{}}); },
+    async setMainCode(code) {
+      if (!/^.{4,20}$/.test(code)) throw new Error('De hoofdcode moet 4 tot 20 tekens zijn.');
+      await sb('app_settings?id=eq.1&select=id', {method:'PATCH', body:{main_code:code}});
+    },
+  };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   2. HULPFUNCTIES
+   ════════════════════════════════════════════════════════════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtPrice = c => '€' + (c / 100).toFixed(2).replace('.', ',');
+const parsePrice = input => {
+  const v = parseFloat(String(input).replace(/[€\s]/g, '').replace(',', '.'));
+  return isNaN(v) || v < 0 ? 0 : Math.round(v * 100);
+};
+const LOC = () => S.lang === 'en' ? 'en-GB' : 'nl-NL';
+const fmtTime = iso => new Date(iso).toLocaleTimeString(LOC(), {hour:'2-digit', minute:'2-digit'});
+const fmtDateTime = iso => new Date(iso).toLocaleString(LOC(), {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+const lsGet = (k, d = null) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+const lsJson = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+/* iconen (inline SVG, geen externe bestanden nodig) */
+const P = {
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  back:'<path d="m12 19-7-7 7-7M19 12H5"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/>',
+  pencil:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  home:'<path d="m3 11 9-8 9 8M5 10v10h14V10"/>',
+  play:'<path d="M7 4l13 8-13 8Z"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  grip:'<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>',
+  down:'<path d="m6 9 6 6 6-6"/>', up:'<path d="m18 15-6-6-6 6"/>',
+  euro:'<path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h9"/>',
+  clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 12h6M9 16h4"/>',
+  xc:'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  spin:'<path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 4v5h-5"/>',
+  okc:'<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
+  cup:'<path d="M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v3M10 2v3M14 2v3"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/>',
+  hand:'<path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-5.9-2.4L3.4 16a2 2 0 0 1 3.2-2.4L8 15"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  snow:'<path d="M12 2v20M4.9 7l14.2 10M19.1 7 4.9 17M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/>',
+  drop:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/>',
+};
+const ic = (n, cls = '', style = '') => `<svg class="ic ${cls}" ${style ? `style="${style}"` : ''} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+
+/* drankjes-iconen: sleutels blijven gelijk aan de oorspronkelijke app (handig voor je database) */
+const DRINK_EMOJI = {Coffee:'☕', CupSoda:'🥤', Thee:'🍵', Bier:'🍺', Taart:'🍰', Alcoholisch:'🍷', Suiker:'🍬', Citrus:'🍋', Cocktail:'🍹', Overig:'✨'};
+const ICON_DISPLAY = {Coffee:'Koffie', CupSoda:'Frisdrank', Thee:'Thee', Bier:'Bier', Taart:'Taart', Alcoholisch:'Alcoholisch', Suiker:'Zoetigheid', Citrus:'Citrus', Overig:'Overige', Cocktail:'Cocktail & Mocktail'};
+const ICON_NAMES = {Thee:'Thee (Warm/Koud)', Bier:'Bier', Taart:'Taart', Alcoholisch:'Alcoholisch', Suiker:'Suiker', Citrus:'Citrus', Cocktail:'Cocktail & Mocktail', Overig:'Overig', Coffee:'Koffie', CupSoda:'Frisdrank'};
+const ICON_OPTIONS = ['Thee','Bier','Taart','Alcoholisch','Suiker','Citrus','Cocktail','Overig','Coffee','CupSoda'];
+const emoji = k => DRINK_EMOJI[k] || DRINK_EMOJI.CupSoda;
+
+const STATUS = {
+  pending: {label:'In afwachting', icon:'clock', cls:'b-pending'},
+  making:  {label:'Wordt gemaakt', icon:'spin',  cls:'b-making'},
+  ready:   {label:'Onderweg',      icon:'okc',   cls:'b-ready'},
+  served:  {label:'Geleverd',      icon:'cup',   cls:'b-served'},
+  declined:{label:'Geweigerd',     icon:'xc',    cls:'b-declined'},
+};
+const badge = (status, small) => {
+  const s = STATUS[status] || STATUS.pending;
+  return `<span class="badge ${s.cls}" ${small ? 'style="font-size:.66rem;padding:2px 8px"' : ''}>${ic(s.icon)}${s.label}</span>`;
+};
+const cycleMode = m => m === 'off' ? 'on' : m === 'on' ? 'locked' : 'off';
+
+/* ════════════════════════════════════════════════════════════════
+   3. STATUS VAN DE APP
+   ════════════════════════════════════════════════════════════════ */
+const S = {
+  data: null, sig: '',
+  route: {path:'/', query:{}}, roomId: 1,
+  lang: lsGet('lang') || ((/^nl\b/i.test(navigator.language || '') || Intl.DateTimeFormat().resolvedOptions().timeZone === 'Europe/Amsterdam') ? 'nl' : 'en'),
+  rr: null, mainCode: '', mainEditing: false, newMainCode: '', secretTaps: [], knownAccess: null,
+  approve: null,
+  dialog: null,               // {type, ...}
+  menuOpen: false,
+  focusId: null,
+  pendingRender: false,
+  dragging: false,
+  knownIds: null,
+  // klant
+  name: lsGet('customerName', ''),
+  nameConfirmed: !!lsGet('customerName'),
+  nameDraft: lsGet('customerName', ''),
+  notes: '',
+  filters: [], mostOrdered: false,
+  selected: [],               // mandje
+  orderCounts: lsJson('orderCounts', {}),
+  dismissed: new Set(lsJson('dismissedDeclines', [])),
+  feedbackText: '', helpName: lsGet('customerName', ''), staffCodeInput: '',
+  placing: false,
+  // volgen
+  trackName: '', trackQuery: '',
+  // medewerker
+  session: null,
+  loginInput: '', loginError: false,
+  filter: 'all',
+  editingName: false, newCafeName: '',
+  editingCode: false, newStaffCode: '',
+  nd: {name:'', icon:'CupSoda', ice:'on', bubbles:'on'},
+  showHistory: false,
+  declineChoice: '', declineCustom: '',
+  editPriceId: null, priceInput: '',
+  // horloge
+  w: {pin:'', auth:false, code:'', err:false},
+};
+
+const SESSION_TTL = 15 * 60 * 1000;
+const sessKey = r => 'adminSession_' + r;
+function readSession(room = S.roomId) {
+  if (!room) return null;
+  try {
+    const raw = sessionStorage.getItem(sessKey(room)); if (!raw) return null;
+    const {code, lastSeen} = JSON.parse(raw);
+    if (Date.now() - lastSeen > SESSION_TTL) { sessionStorage.removeItem(sessKey(room)); return null; }
+    return code;
+  } catch { return null; }
+}
+const writeSession = (code, room = S.roomId) => sessionStorage.setItem(sessKey(room), JSON.stringify({code, lastSeen:Date.now()}));
+const clearSession = (room = S.roomId) => sessionStorage.removeItem(sessKey(room));
+const readMain = () => {
+  try { const r = sessionStorage.getItem('mainSession'); if (!r) return false;
+    if (Date.now() - JSON.parse(r).lastSeen > SESSION_TTL) { sessionStorage.removeItem('mainSession'); return false; } return true; } catch { return false; }
+};
+const writeMain = () => sessionStorage.setItem('mainSession', JSON.stringify({lastSeen:Date.now()}));
+const clearMain = () => sessionStorage.removeItem('mainSession');
+const getDeviceId = () => { let d = lsGet('deviceId'); if (!d) { d = uid(); lsSet('deviceId', d); } return d; };
+
+function toast(title, desc = '', bad = false) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (bad ? ' bad' : '');
+  el.innerHTML = `<b>${esc(tr(title))}</b>${desc ? `<span>${esc(tr(desc))}</span>` : ''}`;
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+const fail = e => toast('Dat lukte niet', e && e.message ? e.message : String(e), true);
+
+/* ════════════════════════════════════════════════════════════════
+   TAAL (Nederlands / English)
+   Het scherm wordt in het Nederlands gebouwd en na het tekenen
+   vertaald via het woordenboek in DICT (en PATTERNS voor zinnen met
+   namen of getallen erin).
+   ════════════════════════════════════════════════════════════════ */
+const DICT = {};
+const PATTERNS = [];
+function trText(s) {
+  if (S.lang !== 'en' || !s) return s;
+  const m = String(s).match(/^(\s*[^\p{L}\p{N}]*)([\s\S]*?)(\s*)$/u);
+  const core = m[2]; if (!core) return s;
+  const key = core.replace(/\s+/g, ' ');
+  if (Object.prototype.hasOwnProperty.call(DICT, key)) return m[1] + DICT[key] + m[3];
+  for (const [re, rep] of PATTERNS) if (re.test(key)) return m[1] + key.replace(re, rep) + m[3];
+  return s;
+}
+const tr = trText;
+function translateDom(el) {
+  if (S.lang !== 'en' || !el) return;
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+  while (w.nextNode()) nodes.push(w.currentNode);
+  for (const n of nodes) {
+    const p = n.parentNode && n.parentNode.tagName;
+    if (p === 'TEXTAREA' || p === 'SCRIPT' || p === 'STYLE') continue;
+    const v = trText(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v;
+  }
+  el.querySelectorAll('[placeholder],[title],[aria-label]').forEach(e => {
+    for (const a of ['placeholder', 'title', 'aria-label']) if (e.hasAttribute(a)) {
+      const v = e.getAttribute(a), t = trText(v); if (t !== v) e.setAttribute(a, t);
+    }
+  });
+}
+const langBtn = () => `<button class="btn btn-sm btn-out" data-a="toggleLang" aria-label="Taal / Language" title="Taal / Language">🌐 ${S.lang === 'en' ? 'NL' : 'EN'}</button>`;
+
+/* ── Engels woordenboek ── */
+Object.assign(DICT, {
+"Aan":"On","Uit":"Off","Alle":"All","Wacht":"Waiting","Maakt":"Making","Klaar":"Ready","Volg":"Track","Verder":"Continue","Naam":"Name","Drankje":"Drink","Prijs":"Price","Status":"Status","Tijd":"Time",
+"Aan: meerdere drankjes selecteren via het mandje.":"On: select several drinks via the basket.",
+"Uit: het drankje wordt direct besteld bij een tik.":"Off: the drink is ordered directly with one tap.",
+"Aanbeveling / Feedback":"Suggestion / Feedback","Deel een suggestie":"Share a suggestion","Deel je feedback":"Share your feedback",
+"Heb je suggesties voor nieuwe functies of verbeteringen?":"Do you have suggestions for new features or improvements?",
+"Aanvraag goedgekeurd":"Request approved","Aanvraag goedkeuren":"Approve request","Aanvraag versturen":"Send request","Aanvraag verstuurd":"Request sent",
+"Admin toegang":"Admin access","Afwijzen":"Decline",
+"Alle bestellingen":"All orders","Alles verwijderen":"Delete everything","Altijd inbegrepen":"Always included","Standaard inbegrepen":"Included by default",
+"Annuleren":"Cancel",
+"Begin met maken":"Start making","Begin →":"Start →","Klaar →":"Done →","Afleveren →":"Serve →","Markeren als klaar":"Mark as ready","Geleverd":"Delivered",
+"Beheer openen":"Open admin","Belangrijke melding":"Important notice","Beschikbare drankjes":"Available drinks",
+"Bestellen is momenteel niet mogelijk":"Ordering is currently unavailable",
+"De bestellingen zijn tijdelijk gesloten. Probeer het later opnieuw.":"Ordering is temporarily closed. Please try again later.",
+"Bestelling geplaatst!":"Order placed!","Bestelling geweigerd":"Order declined","Bestelling plaatsen":"Place order","Plaatsen...":"Placing...",
+"Bestelling verwijderen":"Delete order","Bestelling verwijderen?":"Delete order?","Verwijder bestelling":"Delete order","Ja, verwijder bestelling":"Yes, delete order",
+"Bestelling volgen":"Track order","Bestelling weigeren":"Decline order","Bestelling wijzigen":"Edit order","Wijzigingen opslaan":"Save changes",
+"Bestellingen":"Orders","Bestellingen openen":"Open ordering","Bestellingen sluiten":"Close ordering","Bestellingen overzicht":"Order overview",
+"Bestellingen zijn gesloten.":"Ordering is closed.","Klanten kunnen nu bestellingen plaatsen.":"Customers can place orders now.",
+"Bestelmodus":"Order mode","Multi-bestellen (mandje)":"Multi-order (basket)",
+"Bijv. extra suiker, havermelk...":"E.g. extra sugar, oat milk...","Bijv. extra suiker...":"E.g. extra sugar...",
+"Bubbels":"Bubbles","Bubbels (keuze)":"Bubbles (choice)","Bubbels (vast)":"Bubbles (fixed)","Bubbels (uit)":"Bubbles (off)",
+"Ijs":"Ice","Ijs (keuze)":"Ice (choice)","Ijs (vast)":"Ice (fixed)","Ijs (uit)":"Ice (off)","IJsblokjes":"Ice cubes",
+"Met ijs":"With ice","Met bubbels":"With bubbles","Zonder ijs":"Without ice","Zonder bubbels":"Without bubbles",
+"Café Bestellingen":"Café Orders","Code vergeten?":"Forgot code?","Code wijzigen":"Change code","Dashboard openen":"Open dashboard",
+"Dat lukte niet":"That didn't work","Database":"Database",
+"De beheerder moet je eerst goedkeuren. Houd dit scherm open.":"The admin needs to approve you first. Keep this screen open.",
+"Toegang geweigerd":"Access denied","Even wachten...":"Please wait...",
+"De code moet uit 4 cijfers bestaan.":"The code must be 4 digits.",
+"De hoofdadmin beslist of het doorgaat.":"The main admin decides whether it goes ahead.",
+
+"Dit kan niet ongedaan worden gemaakt.":"This cannot be undone.",
+"Drankje toevoegen":"Add drink","Toevoegen":"Add","Eerdere aanvragen":"Previous requests",
+"Geblokkeerd in je browser":"Blocked in your browser","Niet ondersteund door je browser":"Not supported by your browser",
+"Aan: je hoort het als je bestelling wordt geweigerd":"On: you'll be told if your order is declined",
+"Geef het drankje een naam.":"Give the drink a name.",
+"Geen actieve bestellingen gevonden":"No active orders found","Geen bestellingen":"No orders","Geen bestellingen in deze wachtrij":"No orders in this queue",
+"Geen hulpverzoeken op dit moment.":"No help requests right now.","Geen openstaande aanvragen":"No open requests",
+"Geen verzoeken. Nieuwe bezoekers verschijnen hier als goedkeuring is ingeschakeld.":"No requests. New visitors appear here when approval is turned on.",
+
+"Gesloten":"Closed","Geweigerd":"Declined","Goedgekeurd":"Approved","Niet goedgekeurd":"Not approved","Goedkeuren":"Approve","Goedkeuring aan":"Approval on","Goedkeuring uit":"Approval off","Goedkeuring nodig":"Approval required",
+"Hoe heet jij? Dan weten we voor wie we het drankje maken.":"What's your name? Then we know who the drink is for.",
+"Hoofdadmin":"Main admin","Hoofdcode":"Main code","Nieuwe hoofdcode":"New main code","Hoofdcode gewijzigd":"Main code changed","Ongeldige code":"Invalid code",
+"Hulp vragen":"Ask for help","Hulpverzoeken":"Help requests","Hulpverzoek verstuurd":"Help request sent","Een medewerker komt naar je toe.":"A staff member will come to you.",
+"Stuur hulpverzoek":"Send help request","Medewerker komt naar je toe":"A staff member will come to you",
+"Iedereen mag zonder goedkeuring binnen.":"Everyone can enter without approval.",
+"Ik heb geen tijd nu!":"I don't have time right now!","Ik heb geen zin in jou":"I don't feel like serving you","Vul je echte naam in":"Enter your real name",
+"Ik heb het gelezen":"I've read it","In afwachting":"Pending","Wordt gemaakt":"Being made","Onderweg":"On its way",
+"Inloggen":"Log in","Uitloggen":"Log out","Instellingen":"Settings","Jouw naam":"Your name","Welkom!":"Welcome!",
+"Mijn aanvragen":"My requests",
+"Kies een reden...":"Choose a reason...","Zelf een reden typen...":"Type your own reason...","Typ je reden...":"Type your reason...",
+"Kies je drankje":"Choose your drink","Wat zal het zijn?":"What will it be?","Wat is uw naam?":"What is your name?","Speciale verzoeken (optioneel)":"Special requests (optional)",
+
+"Klaar om te leveren":"Ready to serve","Wacht op bereiding":"Waiting to be made","Aan het maken":"Making",
+"Klant feedback":"Customer feedback","Klant kan kiezen":"Customer can choose","Niet beschikbaar":"Not available",
+"Klik om de naam te wijzigen":"Click to change the name",
+"Markeer als afgehandeld":"Mark as handled","Markeer als gelezen":"Mark as read",
+"Medewerker":"Staff","Medewerker verificatie":"Staff verification","Open het dashboard":"Open the dashboard",
+"Meldingen":"Notifications","Meldingen inschakelen":"Turn on notifications","Meldingen uitschakelen":"Turn off notifications","Stuur een testmelding":"Send a test notification",
+"✓ Meldingen zijn ingeschakeld":"✓ Notifications are turned on",
+"Je browser ondersteunt geen meldingen.":"Your browser doesn't support notifications.",
+"Schakel meldingen in om een melding te krijgen bij elke nieuwe bestelling.":"Turn on notifications to get an alert for every new order.",
+"Je krijgt een melding bij elke nieuwe bestelling en als iemand \"code vergeten\" kiest, zolang de app open staat op dit apparaat.":"You'll get a notification for every new order and when someone chooses \"forgot code\", as long as the app is open on this device.",
+"Meldingen zijn geblokkeerd door je browser. Pas dit aan in de browserinstellingen.":"Notifications are blocked by your browser. Change this in your browser settings.",
+"Met een volledig gesloten app komen meldingen pas als er een aparte pushserver is gekoppeld.":"With a fully closed app, notifications only arrive once a separate push server is connected.",
+"Meldingen worden niet ondersteund":"Notifications are not supported","Meldingen zijn geblokkeerd":"Notifications are blocked",
+"Zet ze aan in de instellingen van je browser.":"Turn them on in your browser settings.",
+"Meldingen staan aan":"Notifications are on","Je hoort het als een bestelling wordt geweigerd.":"You'll be told when an order is declined.",
+"Test melding 🔔":"Test notification 🔔","Test melding":"Test notification","Als je dit ziet, werken de meldingen correct!":"If you can see this, notifications work correctly!",
+"Menu openen":"Open menu","Menu sluiten":"Close menu","Sluiten":"Close","Terug":"Back","Terug naar bestellen":"Back to ordering","Naar bestellen":"Go to ordering",
+"Mijn uitgaven":"My spending","Nog geen bestellingen gevonden.":"No orders found yet.","Niet meegerekend":"Not counted","Geweigerd — niet meegerekend":"Declined — not counted",
+"Totaal te betalen":"Total to pay","Totaal":"Total","Er zijn nog geen prijzen ingesteld door de beheerder.":"The admin hasn't set any prices yet.",
+"Naam wijzigen":"Change name","Nu ingesteld als:":"Currently set as:",
+"Nieuwe bezoekers":"New visitors","Nieuwe bezoekers eerst goedkeuren":"Approve new visitors first",
+"Nieuwe bezoekers eerst laten goedkeuren door de beheerder":"Have new visitors approved by the admin first",
+"Wie voor het eerst in deze sessie binnenkomt, moet eerst door jou worden toegelaten.":"Anyone entering for the first time this session must be admitted by you first.",
+"Nieuwe code":"New code","Nog geen feedback ontvangen.":"No feedback received yet.",
+"Ongeldige toegangscode":"Invalid access code","Onjuiste code. Probeer opnieuw.":"Incorrect code. Try again.",
+"Op slot":"Locked","Op slot zetten":"Lock","Van slot halen":"Unlock","Zichtbaar":"Visible",
+"Opmerkingen (optioneel)":"Notes (optional)","Opslaan":"Save","Wijzigen":"Change",
+"Opties voor klant (klik om te wisselen):":"Options for customer (click to switch):","Tik om te wisselen":"Tap to switch",
+"Overzicht per persoon":"Overview per person","Pas je drankje aan":"Customise your drink",
+"Plaats een nieuwe bestelling →":"Place a new order →","Naar de drankjes →":"To the drinks →",
+"Nog niets besteld":"Nothing ordered yet","Voer hierboven je naam in om je bestelling te volgen.":"Enter your name above to track your order.",
+"Prijs bewerken":"Edit price","Reden":"Reason","Sessie beëindigen":"End session",
+"Sleep een drankje om de volgorde te wijzigen. Klanten zien dezelfde volgorde.":"Drag a drink to change the order. Customers see the same order.","Slepen om te sorteren":"Drag to sort",
+"Stuur de code naar de beheerders":"Send the code to the admins","Beheerders met meldingen aan krijgen de code.":"Admins with notifications on will receive the code.",
+"Taal / Language":"Taal / Language",
+"Toegangscode":"Access code","Toegangscode gewijzigd":"Access code changed","Code gewijzigd":"Code changed","Toegangsverzoeken":"Access requests","Toelaten":"Admit",
+"Toevoegen aan bestelling":"Add to order","Tot":"Until","Van":"From","Versturen":"Send","Verwijderen":"Delete","Volledig verwijderen":"Delete completely",
+"Voer de 4-cijferige toegangscode in om door te gaan.":"Enter the 4-digit access code to continue.",
+"Voer je naam in zodat de medewerker weet wie je bent.":"Enter your name so the staff knows who you are.","Voer je naam in...":"Enter your name...","Voer naam in":"Enter name",
+"Voorbeeld horlogescherm":"Watch screen preview","Voornaam":"First name",
+"Weigeren":"Decline","Welkom bij":"Welcome to",
+"Sessie van":"Session of","Aanvraag":"Request",
+"Voor maximaal 24 uur":"For up to 24 hours","De database is nog niet bijgewerkt. Voer het SQL-script uit in Supabase.":"The database has not been updated yet. Run the SQL script in Supabase.","E-mailadres":"Email address","naam@voorbeeld.nl":"name@example.com","Beheerderscode (4 cijfers)":"Admin code (4 digits)","Vul een geldig e-mailadres in.":"Please enter a valid email address.","Je beheerderscode is actief":"Your admin code is active","De beheerderscode die de aanvrager koos wordt automatisch actief als de sessie begint. Jij kunt die code niet zien, maar wel altijd een andere code instellen.":"The admin code the requester chose becomes active automatically when the session starts. You cannot see that code, but you can always set a different one.","De sessie start automatisch op het gekozen tijdstip.":"The session starts automatically at the chosen time.",
+"Alle beheerders die meldingen hebben aangezet, krijgen een melding waarin de code staat. Dit werkt zolang de app open staat op hun apparaat.":"All admins who have notifications turned on will receive a notification with the code. This works as long as the app is open on their device.","Zelf voor een feest gebruiken?":"Want to use it for your own party?","Gratis, voor maximaal 24 uur":"Free, for up to 24 hours","Zelf voor een feest gebruiken":"Use it for your own party","Er is nu geen feest actief":"There is no party right now","Wil je de app zelf gratis gebruiken voor je eigen feest? Dat kan voor maximaal 24 uur.":"Want to use the app for free for your own party? You can, for up to 24 hours.","De beheerder heeft je toegang tot dit feest geweigerd.":"The admin has denied you access to this party.","Kamer":"Room","Kamer-aanvragen":"Room requests","Gebruik de app gratis voor je eigen feest, voor maximaal 24 uur. Bijvoorbeeld van 13:00 tot de volgende dag 13:00. De hoofdadmin beslist of het doorgaat.":"Use the app for free for your own party, for up to 24 hours. For example from 13:00 until 13:00 the next day. The main admin decides whether it goes ahead.","Hiermee log jij en iedereen die je de code geeft in op het beheer van je feest. De code wordt automatisch actief als je feest begint. De hoofdadmin kan hem niet zien.":"You and anyone you give the code to can use it to log in to your party's admin. The code becomes active automatically when your party starts. The main admin cannot see it.","Kamer leegmaken bij de start (bestellingen, feedback en hulpverzoeken wissen)":"Clear the room at the start (delete orders, feedback and help requests)","Verwijdert alle bestellingen.":"Deletes all orders.","Nieuwe 4-cijferige code voor de kamer":"New 4-digit code for the room","De kamer is in die periode al gereserveerd.":"The room is already reserved for that period.","Een feest kan maximaal 24 uur duren.":"A party can last 24 hours at most.","Sessie stopzetten":"Stop session","Goedgekeurde sessies":"Approved sessions","Gepland":"Planned","Bezig":"In progress","Stopgezet":"Stopped","Goedkeuring intrekken":"Withdraw approval","Weet je zeker dat je de lopende sessie wilt stopzetten en weggooien? De kamer gaat meteen op slot.":"Are you sure you want to stop and discard the running session? The room will be locked immediately.","Weet je zeker dat je de goedkeuring wilt intrekken? De aanvraag wordt dan niet goedgekeurd.":"Are you sure you want to withdraw the approval? The request will then not be approved.","Sessie stopgezet":"Session stopped","Goedkeuring ingetrokken":"Approval withdrawn",
+"Mijn gegevens verwijderen":"Delete my data","Wis je naam, bestellingen en aanvragen":"Erase your name, orders and requests","Weet je zeker dat je jouw gegevens wilt verwijderen? Je bestellingen, hulpverzoeken en aanvragen van dit apparaat worden gewist en je naam wordt vergeten.":"Are you sure you want to delete your data? Your orders, help requests and requests from this device will be erased and your name will be forgotten.","Je gegevens zijn verwijderd.":"Your data has been deleted.",
+"Privacybeleid":"Privacy policy","Welke gegevens we gebruiken":"Which data we use","We gebruiken je naam alleen voor je bestelling.":"We only use your name for your order.","Je e-mailadres wordt alleen gebruikt voor deze aanvraag.":"Your email address is only used for this request.",
+"Buiten sessietijd":"Outside session time","Pagina niet gevonden":"Page not found","Deze pagina bestaat niet.":"This page does not exist.",
+"Laden…":"Loading…","Geen verbinding":"No connection","Opnieuw proberen":"Try again",
+"Je hebt nog niets besteld.":"You haven't ordered anything yet.",
+"Er zijn nog geen drankjes. Voeg ze toe in het medewerker-dashboard.":"There are no drinks yet. Add them in the staff dashboard.",
+"Nog geen drankjes. Voeg er één toe hierboven.":"No drinks yet. Add one above.",
+"Meest besteld":"Most ordered",
+"Koffie":"Coffee","Frisdrank":"Soft drink","Thee":"Tea","Thee (Warm/Koud)":"Tea (Hot/Cold)","Bier":"Beer","Taart":"Cake","Alcoholisch":"Alcoholic","Suiker":"Sugar","Zoetigheid":"Sweets","Overige":"Other","Overig":"Other",
+"Deze bestelling is al in behandeling":"This order is already being handled","Wijzigen kan niet meer.":"Changing is no longer possible.",
+"Bedankt voor je feedback!":"Thanks for your feedback!","Bestelling gewijzigd":"Order changed","Bestelling verwijderd":"Order deleted","Alle bestellingen verwijderd":"All orders deleted",
+"Drankje toegevoegd":"Drink added","Voer eerst uw naam in":"Please enter your name first","Bestellen is gesloten":"Ordering is closed",
+"Wacht even voordat je het opnieuw probeert.":"Please wait a moment before trying again.",
+"Bestelling niet gevonden.":"Order not found.","Drankje niet gevonden.":"Drink not found.","Dit drankje bestaat al.":"This drink already exists.",
+"Geef het café een naam.":"Give the café a name.","Schrijf eerst je feedback.":"Write your feedback first.","Voer eerst je naam in.":"Please enter your name first.","Voer je naam in.":"Please enter your name.",
+"Vul je voornaam in.":"Please enter your first name.","Kies een begin- en eindtijd.":"Choose a start and end time.",
+"De eindtijd moet na de begintijd liggen.":"The end time must be after the start time.","De eindtijd ligt al in het verleden.":"The end time is already in the past.",
+
+"De hoofdcode moet 4 tot 20 tekens zijn.":"The main code must be 4 to 20 characters.",
+"Geen verbinding met de database. Controleer je internet.":"Can't reach the database. Check your internet connection.",
+
+"Ben je zeker dat je ALLE bestellingen wilt verwijderen? Dit kan niet ongedaan gemaakt worden.":"Are you sure you want to delete ALL orders? This cannot be undone.",
+"Deze geweigerde bestelling volledig verwijderen? Dit kan niet ongedaan worden gemaakt.":"Delete this declined order completely? This cannot be undone.",
+"Verwijderen?":"Delete?",
+
+"Nieuwe bestelling!":"New order!","Toegangsverzoek":"Access request","Code vergeten":"Forgot code",
+"Je bestelling voor":"Your order for","is geweigerd.":"has been declined.",
+"hulp":"help","nieuw":"new","toegang":"access","Afgehandeld":"Handled","Gelezen":"Read","Bestelling geweigerd ":"Order declined"
+});
+PATTERNS.push(
+  [/^\((\d+) bestellingen\)$/, '($1 orders)'],
+  [/^(\d+) bestelling\(en\)$/, '$1 order(s)'],
+  [/^(\d+) hulp$/, '$1 help'], [/^(\d+) nieuw$/, '$1 new'], [/^(\d+) toegang$/, '$1 access'],
+  [/^(\d+) van (\d+)$/, '$1 of $2'],
+  [/^(.*) • Afgehandeld$/, '$1 • Handled'], [/^(.*) • Gelezen$/, '$1 • Read'],
+  [/^Je beheerderscode wordt automatisch actief op (.+)$/, 'Your admin code becomes active automatically on $1'],
+  [/^Iemand vroeg de code van (.+) op, maar deze is gewijzigd\. Vraag de hoofdadmin om de code\.$/, 'Someone asked for the code of $1, but it has changed. Ask the main admin for the code.'],
+  [/^Besteld om (.+)$/, 'Ordered at $1'],
+  [/^Bestellingen op naam van (.+)$/, 'Orders under the name $1'],
+  [/^Hoi (.+)!$/, 'Hi $1!'],
+  [/^Welkom bij (.+)!$/, 'Welcome to $1!'],
+  [/^Uitgaven — (.+)$/, 'Spending — $1'],
+  [/^Sessie van (.+)$/, 'Session of $1'],
+  [/^Sessie van (.+), tot (.+)\.$/, 'Session of $1, until $2.'],
+  [/^Geef aan waarom (.+)'s (.+) wordt geweigerd\.$/, "Say why $1's $2 is being declined."],
+  [/^Geef aan waarom deze klant's bestelling wordt geweigerd\.$/, "Say why this order is being declined."],
+  [/^Reden: (.+)$/, (m, a) => 'Reason: ' + trText(a)],
+  [/^We kunnen geen bestellingen vinden voor "(.+)"\.$/, 'We couldn\'t find any orders for "$1".'],
+  [/^Je (.+) en (.+) worden bereid\.$/, 'Your $1 and $2 are being prepared.'],
+  [/^Je (.+) worden bereid\.$/, (m, a) => `Your ${a.replace(/ en /g, ' and ')} are being prepared.`],
+  [/^Je (.+) wordt bereid\.$/, 'Your $1 is being prepared.'],
+  [/^(.+) bestelde (.+)\.$/, '$1 ordered $2.'],
+  [/^(.+) wil naar binnen\.$/, '$1 wants to come in.'],
+  [/^De code van (.+) is (.+)\.$/, 'The code of $1 is $2.'],
+  [/^Code (\d+)$/, 'Code $1'],
+  [/^Je (.+) is geweigerd: (.+)$/, (m, a, b) => `Your ${a} was declined: ${trText(b)}`],
+  [/^Je (.+) is geweigerd\.$/, 'Your $1 was declined.'],
+  [/^"(.+)" verwijderen uit het menu\?$/, 'Remove "$1" from the menu?'],
+);
+
+/* ════════════════════════════════════════════════════════════════
+   4. GEDEELDE ONDERDELEN
+   ════════════════════════════════════════════════════════════════ */
+const drinkById = id => S.data.drinks.find(d => d.id === id);
+const drinkByName = n => S.data.drinks.find(d => d.name === n);
+const myOrders = () => {
+  const n = S.name.trim().toLowerCase(); if (n.length < 2) return [];
+  return S.data.orders.filter(o => o.customerName.toLowerCase() === n).sort((a,b) => b.id - a.id);
+};
+const deviceOrders = () => {
+  const id = lsGet('deviceId'); if (!id) return [];
+  return S.data.orders.filter(o => o.deviceId === id).sort((a,b) => b.id - a.id);
+};
+const trackOrders = () => {
+  const q = S.trackQuery.trim().toLowerCase();
+  const list = q.length > 1 ? S.data.orders.filter(o => o.customerName.toLowerCase() === q).sort((a,b) => b.id - a.id) : deviceOrders();
+  return [...list].sort((a,b) => Number(a.status === 'declined') - Number(b.status === 'declined'));
+};
+
+function bunting() {
+  const cols = ['#6a3df0', '#ff5c93', '#ffc233', '#22c1a6', '#4f8bff'];
+  let h = '<div class="bunting" aria-hidden="true">';
+  for (let i = 0; i < 60; i++) h += `<i style="left:${i * 30 - 6}px;--c:${cols[i % 5]};transform:rotate(${i % 2 ? 4 : -4}deg)"></i>`;
+  return h + '</div>';
+}
+
+const modal = (inner, {wide = false, cls = '', closable = true} = {}) =>
+  `<div class="backdrop" ${closable ? 'data-a="backdrop" data-close="dialog"' : ''}><div class="modal ${wide ? 'wide' : ''} ${cls}" role="dialog" aria-modal="true">${inner}</div></div>`;
+const mhead = (title, closable = true) =>
+  `${closable ? `<button class="iconbtn x" data-a="closeDialog" aria-label="Sluiten">${ic('x')}</button>` : ''}<h3>${title}</h3>`;
+
+const tile = ({kind, mode, on, onAction, big, label, onText, offText, lockedText}) => {
+  const locked = mode === 'locked';
+  const active = locked || on;
+  return `<button type="button" class="tile ${kind} ${active ? 'on' : ''} ${locked ? 'locked' : ''}" ${locked ? '' : `data-a="${onAction}"`} data-testid="toggle-${kind === 'bub' ? 'bubbles' : kind}">
+    ${locked ? `<span class="lk">${ic('lock')}</span>` : ''}
+    <span class="big" style="${active ? '' : 'filter:grayscale(1);opacity:.5'}">${big}</span>
+    <b>${label}</b>
+    <small>${locked ? lockedText : on ? onText : offText}</small>
+    ${locked ? '' : '<small style="opacity:.7">Tik om te wisselen</small>'}
+  </button>`;
+};
+
+function declinedAlertHTML(orders) {
+  const o = (orders || []).find(x => x.status === 'declined' && !S.dismissed.has(x.id));
+  if (!o) return '';
+  return modal(`
+    <div class="hd">${ic('xc', '', 'width:40px;height:40px')}
+      <div><small>Belangrijke melding</small><h3>Bestelling geweigerd</h3></div></div>
+    <div class="bd">
+      <p style="font-size:1.05rem">Je bestelling voor <b>${esc(o.drink)}</b> is geweigerd.</p>
+      ${o.declineReason ? `<div class="reason"><small>Reden</small><p>${esc(o.declineReason)}</p></div>` : ''}
+      <button class="btn btn-danger btn-block btn-lg" data-a="dismissDecline" data-id="${o.id}">Ik heb het gelezen</button>
+    </div>`, {closable:false, cls:'alertbox'});
+}
+
+function dialogHTML() {
+  const d = S.dialog; if (!d) return '';
+  const cfg = S.data.config;
+  switch (d.type) {
+    case 'options': {
+      const dr = drinkById(d.drinkId); if (!dr) return '';
+      const both = dr.iceAvailable !== 'off' && dr.bubblesAvailable !== 'off';
+      const multi = cfg.multiDrinkMode === 'on';
+      return modal(`${mhead(esc(dr.name))}
+        <div class="stack" style="margin-top:8px">
+          <p class="muted" style="font-size:.9rem">Pas je drankje aan</p>
+          <div class="opts ${both ? '' : 'one'}">
+            ${dr.iceAvailable !== 'off' ? tile({kind:'ice', mode:dr.iceAvailable, on:d.ice, onAction:'toggleIce', big:'❄️', label:'IJsblokjes', onText:'Met ijs', offText:'Zonder ijs', lockedText:'Standaard inbegrepen'}) : ''}
+            ${dr.bubblesAvailable !== 'off' ? tile({kind:'bub', mode:dr.bubblesAvailable, on:d.bubbles, onAction:'toggleBub', big:'🫧', label:'Bubbels', onText:'Met bubbels', offText:'Zonder bubbels', lockedText:'Standaard inbegrepen'}) : ''}
+          </div>
+          <button class="btn btn-primary btn-lg btn-block" data-a="optsConfirm" data-testid="button-confirm-options">${multi ? 'Toevoegen aan bestelling' : 'Bestellen'}</button>
+        </div>`);
+    }
+    case 'feedback':
+      return modal(`${mhead('Deel je feedback')}
+        <div class="stack" style="margin-top:12px">
+          <textarea id="feedbackText" class="textarea" data-m="feedbackText" placeholder="Heb je suggesties voor nieuwe functies of verbeteringen?">${esc(S.feedbackText)}</textarea>
+          <button class="btn btn-primary btn-lg btn-block" data-a="sendFeedback">Versturen</button>
+        </div>`);
+    case 'help':
+      return modal(`${mhead('Hulp vragen')}
+        <div class="stack" style="margin-top:12px">
+          <p class="muted" style="font-size:.9rem">Voer je naam in zodat de medewerker weet wie je bent.</p>
+          <input id="helpName" class="input" data-m="helpName" data-enter="sendHelp" placeholder="Jouw naam" value="${esc(S.helpName)}" data-testid="input-help-name">
+          <button class="btn btn-primary btn-lg btn-block" data-a="sendHelp" data-dis="help" data-testid="button-send-help">Stuur hulpverzoek</button>
+        </div>`);
+    case 'staffcode':
+      return modal(`${mhead('Medewerker verificatie')}
+        <div class="stack" style="margin-top:12px">
+          <input id="staffCodeInput" type="password" inputmode="numeric" maxlength="4" class="input pin" data-m="staffCodeInput" data-enter="staffLogin" placeholder="••••" value="${esc(S.staffCodeInput)}" data-testid="input-staff-code" autocomplete="off">
+          <button class="btn btn-primary btn-lg btn-block" data-a="staffLogin" data-testid="button-staff-login">Dashboard openen</button>
+        </div>`);
+    case 'spend': {
+      const orders = myOrders();
+      const price = o => (drinkByName(o.drink) || {}).priceInCents || 0;
+      const total = orders.filter(o => o.status !== 'declined').reduce((s,o) => s + price(o), 0);
+      const declTotal = orders.filter(o => o.status === 'declined').reduce((s,o) => s + price(o), 0);
+      const anyPrices = orders.some(o => price(o) > 0);
+      return modal(`${mhead('Uitgaven — ' + esc(S.name))}
+        <div class="stack" style="margin-top:12px">
+        ${orders.length === 0 ? '<p class="muted center" style="padding:24px 0">Nog geen bestellingen gevonden.</p>' : `
+          <div class="dlist" style="max-height:280px;overflow:auto">
+            ${orders.map(o => `<div class="row between" style="padding:8px 12px;border-radius:12px;background:${o.status === 'declined' ? 'var(--red-bg)' : 'var(--paper)'}">
+              <div style="min-width:0"><b style="font-size:.92rem">${esc(o.drink)}</b>
+                <div class="mono">${fmtDateTime(o.createdAt)}</div>${badge(o.status, true)}</div>
+              ${anyPrices ? `<div style="text-align:right;flex:none"><b style="${o.status === 'declined' ? 'color:var(--red);text-decoration:line-through' : ''}">${price(o) > 0 ? fmtPrice(price(o)) : '—'}</b>
+                ${o.status === 'declined' && price(o) > 0 ? '<div style="font-size:.66rem;color:var(--red);font-weight:700">Niet meegerekend</div>' : ''}</div>` : ''}
+            </div>`).join('')}
+          </div>
+          ${anyPrices ? `<div class="sum pay"><span>Totaal te betalen</span><span>${fmtPrice(total)}</span></div>` : '<p class="muted center" style="font-size:.8rem">Er zijn nog geen prijzen ingesteld door de beheerder.</p>'}
+          ${anyPrices && declTotal > 0 ? `<div class="row between" style="font-size:.76rem;color:var(--red);padding:0 4px"><span>Geweigerd — niet meegerekend</span><b>−${fmtPrice(declTotal)}</b></div>` : ''}`}
+        </div>`);
+    }
+    case 'editOrder': {
+      const dr = drinkByName(d.drink);
+      const ice = dr ? dr.iceAvailable : 'off', bub = dr ? dr.bubblesAvailable : 'off';
+      if (d.confirmDelete) return modal(`${mhead('Bestelling wijzigen')}
+        <div class="stack" style="margin-top:12px">
+          <div class="center" style="background:var(--red-bg);border-radius:16px;padding:18px"><div style="font-size:34px">🗑️</div><b>Bestelling verwijderen?</b><p class="muted" style="font-size:.85rem;margin-top:2px">Dit kan niet ongedaan worden gemaakt.</p></div>
+          <button class="btn btn-danger btn-lg btn-block" data-a="deleteMyOrder">Ja, verwijder bestelling</button>
+          <button class="btn btn-out btn-block" data-a="cancelDelete">Annuleren</button>
+        </div>`, {wide:true});
+      return modal(`${mhead('Bestelling wijzigen')}
+        <div class="stack" style="margin-top:12px">
+          <div class="field"><label>Drankje</label>
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:6px;max-height:180px;overflow:auto;padding-right:2px">
+              ${S.data.drinks.map(x => `<button type="button" class="btn btn-sm ${d.drink === x.name ? 'btn-primary' : 'btn-out'}" style="justify-content:flex-start" data-a="editPick" data-name="${esc(x.name)}">${emoji(x.icon)} ${esc(x.name)}</button>`).join('')}
+            </div></div>
+          ${(ice !== 'off' || bub !== 'off') ? `<div class="field"><label>Opties</label>
+            <div class="opts ${ice !== 'off' && bub !== 'off' ? '' : 'one'}">
+              ${ice !== 'off' ? tile({kind:'ice', mode:ice, on:d.ice, onAction:'editIce', big:'❄️', label:'IJsblokjes', onText:'Met ijs', offText:'Zonder ijs', lockedText:'Altijd inbegrepen'}) : ''}
+              ${bub !== 'off' ? tile({kind:'bub', mode:bub, on:d.bubbles, onAction:'editBub', big:'🫧', label:'Bubbels', onText:'Met bubbels', offText:'Zonder bubbels', lockedText:'Altijd inbegrepen'}) : ''}
+            </div></div>` : ''}
+          <div class="field"><label>Opmerkingen (optioneel)</label>
+            <input id="editNotes" class="input" data-m="editNotes" placeholder="Bijv. extra suiker..." value="${esc(d.notes)}"></div>
+          <button class="btn btn-primary btn-lg btn-block" data-a="saveEdit">Wijzigingen opslaan</button>
+          <button class="btn btn-ghost btn-block" style="color:var(--red)" data-a="askDelete">${ic('trash')} Bestelling verwijderen</button>
+        </div>`, {wide:true});
+    }
+    case 'decline': {
+      const o = S.data.orders.find(x => x.id === d.id);
+      return modal(`${mhead('Bestelling weigeren')}
+        <div class="stack" style="margin-top:12px">
+          <p class="muted" style="font-size:.9rem">Geef aan waarom ${esc(o ? o.customerName : 'deze klant')}'s ${esc(o ? o.drink : 'bestelling')} wordt geweigerd.</p>
+          <select id="declineChoice" class="select" data-m="declineChoice">
+            <option value="">Kies een reden...</option>
+            ${['Ik heb geen zin in jou', 'Vul je echte naam in', 'Ik heb geen tijd nu!'].map(r => `<option value="${esc(r)}" ${S.declineChoice === r ? 'selected' : ''}>${esc(r)}</option>`).join('')}
+            <option value="custom" ${S.declineChoice === 'custom' ? 'selected' : ''}>Zelf een reden typen...</option>
+          </select>
+          ${S.declineChoice === 'custom' ? `<input id="declineCustom" class="input" data-m="declineCustom" maxlength="200" placeholder="Typ je reden..." value="${esc(S.declineCustom)}">` : ''}
+          <button class="btn btn-danger btn-lg btn-block" data-a="confirmDecline" data-dis="decline">Bestelling weigeren</button>
+        </div>`);
+    }
+    case 'forgot':
+      return modal(`${mhead('Code vergeten?')}
+        <div class="stack" style="margin-top:12px">
+          <p class="muted" style="font-size:.92rem">Alle beheerders die meldingen hebben aangezet, krijgen een melding waarin de code staat. Dit werkt zolang de app open staat op hun apparaat.</p>
+          <button class="btn btn-primary btn-block btn-lg" data-a="sendCodeRequest" data-testid="button-send-code-request">Stuur de code naar de beheerders</button>
+          <button class="btn btn-out btn-block" data-a="closeDialog">Annuleren</button>
+        </div>`);
+  }
+  return extraDialogHTML(d);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   5. SCHERM: BESTELLEN (klant)
+   ════════════════════════════════════════════════════════════════ */
+const custNotifyOn = () => ('Notification' in window) && Notification.permission === 'granted' && lsGet('custNotify') === '1';
+function drawerHTML() {
+  if (!S.menuOpen) return '';
+  const open = roomVisible(S.data.config);
+  const item = (action, iconName, title, sub) => `<button class="menu-item" data-a="${action}"><span class="mi">${ic(iconName)}</span><span><b>${title}</b><small>${sub}</small></span></button>`;
+  const notif = !('Notification' in window) ? 'Niet ondersteund door je browser' : Notification.permission === 'denied' ? 'Geblokkeerd in je browser' : custNotifyOn() ? 'Aan: je hoort het als je bestelling wordt geweigerd' : 'Uit';
+  return `<div class="backdrop side" data-a="backdrop" data-close="menu"><aside class="drawer">
+    <header><div class="row"><span class="logo" style="width:30px;height:30px;font-size:15px">${ic('cup')}</span><b style="font-family:var(--font-display);font-size:1.05rem">${esc(S.data.config.cafeName)}</b></div>
+      <button class="iconbtn" data-a="closeMenu" aria-label="Menu sluiten">${ic('x')}</button></header>
+    <nav class="stack" style="padding:12px;flex:1;overflow:auto">
+      ${S.nameConfirmed ? item('changeName', 'user', 'Naam wijzigen', `Nu ingesteld als: <b>${esc(S.name)}</b>`) : ''}
+      ${item('toggleCustNotify', 'bell', 'Meldingen', notif)}
+      ${open ? item('openFeedback', 'msg', 'Aanbeveling / Feedback', 'Deel een suggestie') : ''}
+      ${open ? item('openHelp', 'hand', 'Hulp vragen', 'Medewerker komt naar je toe') : ''}
+      ${open && S.nameConfirmed ? item('openSpend', 'euro', 'Mijn uitgaven', `Bestellingen op naam van ${esc(S.name)}`) : ''}
+      ${item('openRoomRequest', 'clock', 'Zelf voor een feest gebruiken?', 'Gratis, voor maximaal 24 uur')}
+      ${S.nameConfirmed ? item('deleteMyData', 'trash', 'Mijn gegevens verwijderen', 'Wis je naam, bestellingen en aanvragen') : ''}
+      ${item('openPrivacy', 'eye', 'Privacybeleid', 'Welke gegevens we gebruiken')}
+      ${item('openStaff', 'lock', 'Medewerker', 'Open het dashboard')}
+    </nav>${secretBtn(true)}</aside></div>`;
+}
+
+function homeBody() {
+  const cfg = S.data.config, drinks = S.data.drinks;
+  if (cfg.orderingOpen === false) return `<div class="gate closed"><div class="box">
+      <div class="disc">🚫</div><h2>Bestellen is momenteel niet mogelijk</h2>
+      <p>De bestellingen zijn tijdelijk gesloten. Probeer het later opnieuw.</p></div></div>`;
+  if (!S.nameConfirmed) return `<div class="gate"><div class="box">
+      <div class="big">${ic('cup')}</div>
+      <h2>Welkom bij ${esc(cfg.cafeName)}!</h2>
+      <p>Hoe heet jij? Dan weten we voor wie we het drankje maken.</p>
+      <div class="stack">
+        <input id="gateName" class="input center" style="min-height:52px;font-size:1.05rem" data-m="nameDraft" data-enter="confirmName" placeholder="Jouw naam" value="${esc(S.nameDraft)}" data-testid="input-name-gate" autocomplete="given-name">
+        <button class="btn btn-primary btn-lg btn-block" data-a="confirmName" data-dis="gate" data-testid="button-confirm-name">Verder</button>
+        <p class="muted" style="font-size:.8rem">We gebruiken je naam alleen voor je bestelling. <a href="privacybeleid.html" style="color:var(--violet);font-weight:700">Privacybeleid</a></p>
+      </div></div></div>`;
+
+  const uniqueIcons = [...new Set(drinks.map(d => d.icon || 'CupSoda'))];
+  const source = (!S.mostOrdered && S.filters.length) ? drinks.filter(d => S.filters.includes(d.icon || 'CupSoda')) : drinks;
+  let groups;
+  if (S.mostOrdered) {
+    const ordered = source.filter(d => (S.orderCounts[d.id] || 0) > 0).sort((a,b) => (S.orderCounts[b.id] || 0) - (S.orderCounts[a.id] || 0));
+    groups = ordered.length ? [{key:'__most__', label:'Meest besteld', special:true, drinks:ordered}] : [];
+  } else {
+    groups = [...new Set(source.map(d => d.icon || 'CupSoda'))].map(icon => ({key:icon, label:ICON_DISPLAY[icon] || icon, drinks:source.filter(d => (d.icon || 'CupSoda') === icon)}));
+  }
+  const hasHistory = Object.keys(S.orderCounts).length > 0;
+  return `<div class="scroll" id="scroller"><div class="wrap">
+    <div class="hello"><h2>Wat zal het zijn?</h2><p>Kies je drankje</p></div>
+    <div class="stack">
+      <div class="field"><label for="name">Wat is uw naam?</label>
+        <input id="name" class="input" data-m="name" placeholder="Voer naam in" value="${esc(S.name)}" data-testid="input-name"></div>
+      <div class="field"><label for="notes">Speciale verzoeken (optioneel)</label>
+        <input id="notes" class="input" data-m="notes" placeholder="Bijv. extra suiker, havermelk..." value="${esc(S.notes)}" data-testid="input-notes"></div>
+    </div>
+    ${(uniqueIcons.length > 1 || hasHistory) ? `<div class="filters">
+      ${hasHistory ? `<button type="button" class="chip ${S.mostOrdered ? 'on' : ''}" data-a="filterMost" data-testid="filter-most-ordered">⭐ Meest besteld</button>` : ''}
+      ${uniqueIcons.length > 1 ? `<button type="button" class="chip ${!S.mostOrdered && !S.filters.length ? 'on' : ''}" data-a="filterAll">Alle</button>
+        ${uniqueIcons.map(i => `<button type="button" class="chip ${!S.mostOrdered && S.filters.includes(i) ? 'on' : ''}" data-a="filterIcon" data-icon="${esc(i)}" title="${esc(ICON_DISPLAY[i] || i)}" aria-label="${esc(ICON_DISPLAY[i] || i)}">${emoji(i)}</button>`).join('')}` : ''}
+    </div>` : ''}
+    ${groups.map(g => `<section>
+      ${groups.length > 1 ? `<p class="group-title ${g.special ? 'star' : ''}">${g.special ? '⭐ ' : ''}${esc(g.label)}</p>` : '<div style="height:10px"></div>'}
+      <div class="grid">${g.drinks.map(d => {
+        const sel = S.selected.some(s => s.drinkId === d.id);
+        return `<button type="button" class="drink ${sel ? 'sel' : ''}" data-a="pickDrink" data-id="${d.id}">
+          <span class="em">${emoji(d.icon)}</span><span class="nm">${esc(d.name)}</span>
+          ${d.priceInCents > 0 ? `<span class="pr">${fmtPrice(d.priceInCents)}</span>` : ''}
+          ${sel ? `<span class="tick">${ic('check')}</span>` : ''}</button>`;
+      }).join('')}</div></section>`).join('')}
+    ${S.mostOrdered && !groups.length ? '<p class="muted center" style="padding:30px 0">Je hebt nog niets besteld.</p>' : ''}
+    ${!drinks.length ? '<p class="muted center" style="padding:30px 0">Er zijn nog geen drankjes. Voeg ze toe in het medewerker-dashboard.</p>' : ''}
+  </div></div>
+  ${cfg.multiDrinkMode === 'on' ? `<div class="bar"><button class="btn btn-primary btn-lg" data-a="placeOrder" data-dis="basket" data-testid="button-place-order">
+      ${S.placing ? 'Plaatsen...' : `Bestelling plaatsen ${S.selected.length ? `<span class="count" style="background:#fff;color:var(--violet)">${S.selected.length}</span>` : ''}`}</button></div>` : ''}`;
+}
+
+function viewHome() {
+  const closed = S.data.config.orderingOpen === false;
+  return `<div class="screen">
+    ${bunting()}
+    <header class="topbar">
+      <div class="l">
+        <button class="iconbtn" data-a="openMenu" aria-label="Menu openen" data-testid="button-open-menu">${ic('menu')}</button>
+        <span class="logo">${ic('cup')}</span>
+        <h1>${esc(S.data.config.cafeName)}</h1>
+      </div>
+      <div class="row" style="gap:6px">${langBtn()}${closed ? '' : `<a class="btn btn-sm btn-out" href="${hrefRoom('/track')}">${ic('search')}Volg</a>`}</div>
+    </header>
+    ${homeBody()}
+    ${S.nameConfirmed ? '' : secretBtn()}
+    ${drawerHTML()}${dialogHTML()}${declinedAlertHTML(myOrders())}
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   6. SCHERM: BESTELLING VOLGEN
+   ════════════════════════════════════════════════════════════════ */
+function trackResultsHTML() {
+  const orders = trackOrders();
+  const q = S.trackQuery.trim();
+  if (!orders.length) {
+    if (q) return `<div class="empty"><div class="e">🔍</div><h3>Geen actieve bestellingen gevonden</h3>
+      <p>We kunnen geen bestellingen vinden voor "${esc(q)}".</p>
+      <a href="${hrefRoom()}" style="display:inline-block;margin-top:12px;color:var(--violet);font-weight:700">Plaats een nieuwe bestelling →</a></div>`;
+    return `<div class="empty"><div class="e">☕</div><h3>Nog niets besteld</h3><p>Voer hierboven je naam in om je bestelling te volgen.</p>
+      <a href="${hrefRoom()}" style="display:inline-block;margin-top:12px;color:var(--violet);font-weight:700">Naar de drankjes →</a></div>`;
+  }
+  return `<div class="stack" style="margin-top:0">${orders.map(o => {
+    const dec = o.status === 'declined';
+    return `<article class="order ${dec ? 'dec' : ''}">
+      <div class="em">${emoji((drinkByName(o.drink) || {}).icon)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="row wrap-r" style="gap:6px">
+          <h3>${esc(o.drink)}</h3>
+          ${o.withIce ? '<span class="pill pill-ice">❄️ Ijs</span>' : ''}
+          ${o.withBubbles ? '<span class="pill pill-bub">🫧 Bubbels</span>' : ''}
+          ${o.status === 'pending' ? `<button class="btn btn-ghost btn-sq" data-a="editOrder" data-id="${o.id}" aria-label="Bestelling wijzigen">${ic('pencil')}</button>` : ''}
+        </div>
+        ${o.notes ? `<p class="note">"${esc(o.notes)}"</p>` : ''}
+        ${dec && o.declineReason ? `<p style="color:var(--red);font-weight:700;font-size:.88rem;margin-top:4px">Reden: ${esc(o.declineReason)}</p>` : ''}
+        <p class="meta">Besteld om ${fmtTime(o.createdAt)}</p>
+        <div style="margin-top:8px">${badge(o.status)}</div>
+      </div></article>`;
+  }).join('')}</div>`;
+}
+
+function viewTrack() {
+  return `<div class="screen">
+    <header class="topbar" style="border-bottom:2px solid var(--line-2);background:#fff;padding:12px 14px">
+      <div class="l"><a class="iconbtn" href="${hrefRoom()}" aria-label="Terug">${ic('back')}</a><h1>Bestelling volgen</h1></div>${langBtn()}
+    </header>
+    <div class="scroll" id="scroller"><div class="wrap" style="padding-top:18px">
+      <div class="search">${ic('search')}<input id="trackName" class="input" data-m="trackName" placeholder="Voer je naam in..." value="${esc(S.trackName)}" autocomplete="off"></div>
+      <div id="track-results" style="margin-top:18px">${trackResultsHTML()}</div>
+    </div></div>
+    ${dialogHTML()}${declinedAlertHTML(trackOrders())}
+  </div>`;
+}
+function updateTrackResults() {
+  const el = $('#track-results'); if (!el) return;
+  el.innerHTML = trackResultsHTML(); translateDom(el);
+  if (declinedPending(trackOrders())) render();
+}
+const declinedPending = orders => (orders || []).some(o => o.status === 'declined' && !S.dismissed.has(o.id));
+
+/* ════════════════════════════════════════════════════════════════
+   DE BAR: slot, toegang, bar-aanvragen en hoofdadmin
+   ════════════════════════════════════════════════════════════════ */
+const rp = (sub = '') => sub || '/';
+const hrefRoom = (sub = '') => '#' + rp(sub);
+const inWindow = c => {
+  const n = Date.now(), s = c.sessionStart ? Date.parse(c.sessionStart) : null, e = c.sessionEnd ? Date.parse(c.sessionEnd) : null;
+  return (s === null || n >= s) && (e === null || n <= e);
+};
+const roomVisible = c => !!c && !c.locked && inWindow(c);
+const sessionOk = (c, iso) => !c.sessionStart || Date.parse(iso) >= Date.parse(c.sessionStart);
+const overlaps = (a0, a1, b0, b1) => Date.parse(a0) < Date.parse(b1) && Date.parse(b0) < Date.parse(a1);
+
+function myAccessRow() {
+  const c = S.data.config, d = getDeviceId();
+  return (S.data.access || []).filter(a => a.deviceId === d && sessionOk(c, a.createdAt)).sort((a, b) => b.id - a.id)[0];
+}
+function isHost() {
+  const d = getDeviceId();
+  return (S.data.roomRequests || []).some(r => r.deviceId === d && r.status === 'approved' && inWindow({sessionStart:r.startAt, sessionEnd:r.endAt}));
+}
+function hasAccess() {
+  const c = S.data.config; if (!c || !c.requireApproval) return true;
+  if (readSession() || readMain() || isHost()) return true;
+  const r = myAccessRow(); return !!r && r.status === 'approved';
+}
+async function ensureAccess() {      // nieuwe bezoeker: vraag toegang aan als dat nodig is
+  const c = S.data.config;
+  if (!c || !S.nameConfirmed || !roomVisible(c) || !c.requireApproval || hasAccess() || myAccessRow()) return;
+  try { await DB.createAccess(S.name, getDeviceId()); await refresh(); } catch (e) { fail(e); }
+}
+
+const secretBtn = (inDrawer = false) => `<button class="secret ${inDrawer ? 'in-drawer' : ''}" data-a="secretTap" tabindex="-1" aria-hidden="true" data-testid="secret-button${inDrawer ? '-drawer' : ''}"></button>`;
+
+function myRequestsHTML() {
+  const mine = (S.data.roomRequests || []).filter(r => r.status === 'pending' || Date.parse(r.endAt) > Date.now() - 864e5).sort((a, b) => b.id - a.id);
+  if (!mine.length) return '';
+  const st = {pending:['b-pending', 'In afwachting'], approved:['b-ready', 'Goedgekeurd'], denied:['b-declined', 'Niet goedgekeurd'], stopped:['b-served', 'Stopgezet']};
+  return `<div class="card" style="margin-top:16px;text-align:left"><h3>Mijn aanvragen</h3><div class="dlist">
+    ${mine.map(r => `<div class="fb" style="flex-direction:column;gap:6px;align-items:stretch">
+      <div class="row between"><b>${esc(r.firstName)}</b><span class="badge ${st[r.status][0]}">${st[r.status][1]}</span></div>
+      <span class="mono">${fmtDateTime(r.startAt)} – ${fmtDateTime(r.endAt)}</span>
+      ${r.status === 'approved' ? `<div class="sum pay"><span>${Date.now() < Date.parse(r.startAt) ? `Je beheerderscode wordt automatisch actief op ${fmtDateTime(r.startAt)}` : 'Je beheerderscode is actief'}</span></div>` : ''}
+    </div>`).join('')}</div></div>`;
+}
+
+function viewLocked() {
+  return `<div class="screen">${bunting()}
+    <header class="topbar"><div class="l">
+      <button class="iconbtn" data-a="openMenu" aria-label="Menu openen">${ic('menu')}</button>
+      <span class="logo">${ic('cup')}</span><h1>${esc(S.data.config.cafeName)}</h1></div>${langBtn()}</header>
+    <div class="scroll"><div class="gate closed"><div class="box">
+      <div class="disc">🚪</div><h2>Er is nu geen feest actief</h2>
+      <p>Wil je de app zelf gratis gebruiken voor je eigen feest? Dat kan voor maximaal 24 uur.</p>
+      <button class="btn btn-primary btn-lg btn-block" data-a="openRoomRequest" data-testid="button-request-room">Zelf voor een feest gebruiken?</button>
+      ${myRequestsHTML()}
+    </div></div></div>
+    ${secretBtn()}${drawerHTML()}${dialogHTML()}</div>`;
+}
+
+function viewAccess() {
+  const denied = (myAccessRow() || {}).status === 'denied';
+  return `<div class="screen">${bunting()}
+    <header class="topbar"><div class="l">
+      <button class="iconbtn" data-a="openMenu" aria-label="Menu openen">${ic('menu')}</button></div>${langBtn()}</header>
+    <div class="gate"><div class="box">
+      <div class="big">${denied ? '🚫' : '⏳'}</div>
+      <h2>${denied ? 'Toegang geweigerd' : 'Even wachten...'}</h2>
+      <p>${denied ? 'De beheerder heeft je toegang tot dit feest geweigerd.' : 'De beheerder moet je eerst goedkeuren. Houd dit scherm open.'}</p>
+    </div></div>${drawerHTML()}${dialogHTML()}</div>`;
+}
+
+/* ── hoofdadmin ── */
+function viewMain() {
+  const c = S.data.config, vis = roomVisible(c), now = Date.now();
+  const reqs = [...S.data.roomRequests].sort((x, y) => y.id - x.id);
+  const pending = reqs.filter(q => q.status === 'pending');
+  const active = reqs.filter(q => q.status === 'approved' && Date.parse(q.endAt) > now);       // gepland of bezig
+  const done = reqs.filter(q => !pending.includes(q) && !active.includes(q));
+  const stl = {approved:['b-ready', 'Goedgekeurd'], denied:['b-declined', 'Niet goedgekeurd'], stopped:['b-served', 'Stopgezet']};
+  const mail = q => q.email ? `<p style="font-size:.85rem;margin-top:2px"><a href="mailto:${esc(q.email)}" style="color:var(--violet);font-weight:700">${esc(q.email)}</a></p>` : '';
+  return `<div class="screen">
+    <header class="s-head">
+      <div class="row" style="gap:10px"><span class="logo">${ic('lock')}</span><h1 style="cursor:default">Hoofdadmin</h1>${pending.length ? `<span class="count pulse">${pending.length}</span>` : ''}</div>
+      <div class="row">${langBtn()}<button class="btn btn-sm btn-out" data-a="mainLogout" aria-label="Uitloggen">${ic('home')}</button></div>
+    </header>
+    <div class="scroll" id="scroller"><div class="wrap-wide">
+      <h2 class="sec-title" style="margin-top:0">Kamer</h2>
+      <div class="card" style="max-width:520px">
+        <div class="row between" style="margin-bottom:10px"><h3 style="margin:0">${esc(c.cafeName)}</h3>
+          <span class="badge ${vis ? 'b-ready' : 'b-declined'}">${vis ? 'Zichtbaar' : c.locked ? 'Op slot' : 'Buiten sessietijd'}</span></div>
+        ${c.hostName ? `<p class="muted" style="font-size:.85rem">Sessie van ${esc(c.hostName)}<br>${fmtDateTime(c.sessionStart)} – ${fmtDateTime(c.sessionEnd)}</p>` : ''}
+        ${c.requireApproval ? '<p style="margin-top:6px"><span class="pill pill-bub">Goedkeuring nodig</span></p>' : ''}
+        <div class="stack" style="margin-top:12px">
+          <button class="btn btn-block ${vis ? 'btn-danger-out' : 'btn-primary'}" data-a="toggleLock" data-testid="button-lock">${ic('lock')} ${vis ? 'Op slot zetten' : 'Van slot halen'}</button>
+          <div class="row wrap-r" style="gap:6px">
+            <button class="btn btn-sm btn-out" data-a="openRoomAdmin">Beheer openen</button>
+            <button class="btn btn-sm btn-ghost" data-a="changeRoomCode">Code wijzigen</button>
+            ${c.hostName ? `<button class="btn btn-sm btn-ghost" style="color:var(--red)" data-a="stopSession" data-testid="button-stop-session">Sessie stopzetten</button>` : ''}
+          </div></div></div>
+
+      <h2 class="sec-title">Kamer-aanvragen</h2>
+      <div class="dlist" id="room-requests">
+        ${pending.length === 0 ? '<div class="empty"><div class="e">📭</div><h3>Geen openstaande aanvragen</h3></div>' : pending.map(q => `
+          <div class="card"><div class="row between" style="align-items:flex-start"><div><h3 style="margin:0">${esc(q.firstName)}</h3>
+            <p class="muted" style="font-size:.85rem">${fmtDateTime(q.startAt)} – ${fmtDateTime(q.endAt)}</p>${mail(q)}</div>
+            <span class="badge b-pending">In afwachting</span></div>
+            ${q.requireApproval ? '<p style="margin-top:8px"><span class="pill pill-bub">Nieuwe bezoekers eerst goedkeuren</span></p>' : ''}
+            <div class="row" style="margin-top:12px;gap:8px">
+              <button class="btn btn-green" style="flex:1" data-a="openApprove" data-id="${q.id}" data-testid="button-approve-${q.id}">${ic('check')} Goedkeuren</button>
+              <button class="btn btn-danger-out" style="flex:1" data-a="denyRequest" data-id="${q.id}">${ic('x')} Afwijzen</button>
+            </div></div>`).join('')}
+      </div>
+
+      ${active.length ? `<h3 style="margin:22px 0 8px;font-size:1rem">Goedgekeurde sessies</h3><div class="dlist" id="active-requests">${active.map(q => {
+        const running = q.applied && inWindow({sessionStart:q.startAt, sessionEnd:q.endAt});
+        return `<div class="card"><div class="row between" style="align-items:flex-start"><div><h3 style="margin:0">${esc(q.firstName)}</h3>
+          <p class="muted" style="font-size:.85rem">${fmtDateTime(q.startAt)} – ${fmtDateTime(q.endAt)}</p>${mail(q)}</div>
+          <span class="badge ${running ? 'b-making' : 'b-pending'}">${running ? 'Bezig' : 'Gepland'}</span></div>
+          <div style="margin-top:12px">${running
+            ? `<button class="btn btn-danger-out btn-block" data-a="stopSession" data-testid="button-stop-running">Sessie stopzetten</button>`
+            : `<button class="btn btn-danger-out btn-block" data-a="revokeRequest" data-id="${q.id}" data-testid="button-revoke-${q.id}">Goedkeuring intrekken</button>`}</div></div>`; }).join('')}</div>` : ''}
+
+      ${done.length ? `<h3 style="margin:22px 0 8px;font-size:1rem">Eerdere aanvragen</h3><div class="dlist">${done.map(q => `
+        <div class="fb"><div><b>${esc(q.firstName)}</b><div class="mono">${fmtDateTime(q.startAt)} – ${fmtDateTime(q.endAt)}</div></div>
+          <div class="row"><span class="badge ${(stl[q.status] || stl.approved)[0]}">${(stl[q.status] || stl.approved)[1]}</span>
+          <button class="btn btn-ghost btn-sq" style="color:var(--red-solid)" data-a="deleteRequest" data-id="${q.id}" aria-label="Verwijderen">${ic('trash')}</button></div></div>`).join('')}</div>` : ''}
+
+      <div class="card" style="margin-top:28px;max-width:420px"><h3>Hoofdcode</h3>
+        ${S.mainEditing ? `<div class="row"><input id="newMainCode" class="input" data-m="newMainCode" data-enter="saveMainCode" placeholder="Nieuwe hoofdcode" value="${esc(S.newMainCode)}"><button class="btn btn-primary" data-a="saveMainCode">Opslaan</button></div>`
+          : '<button class="btn btn-out btn-block" data-a="editMainCode">Wijzigen</button>'}</div>
+    </div></div>${dialogHTML()}</div>`;
+}
+
+/* extra dialogen */
+function extraDialogHTML(d) {
+  switch (d.type) {
+    case 'mainLogin':
+      return modal(`${mhead('Hoofdadmin')}
+        <div class="stack" style="margin-top:12px">
+          <input id="mainCodeInput" type="password" class="input pin" style="letter-spacing:.3em" data-m="mainCode" data-enter="mainLogin" placeholder="••••" value="${esc(S.mainCode)}" autocomplete="off" data-testid="input-main-code">
+          <button class="btn btn-primary btn-lg btn-block" data-a="mainLogin" data-testid="button-main-login">Inloggen</button>
+        </div>`);
+    case 'requestRoom': {
+      const f = S.rr;
+      return modal(`${mhead('Zelf voor een feest gebruiken')}
+        <div class="stack" style="margin-top:12px">
+          <p class="muted" style="font-size:.9rem">Gebruik de app gratis voor je eigen feest, voor maximaal 24 uur. Bijvoorbeeld van 13:00 tot de volgende dag 13:00. De hoofdadmin beslist of het doorgaat.</p>
+          <div class="field"><label for="rrName">Voornaam</label><input id="rrName" class="input" data-m="rrName" value="${esc(f.name)}" autocomplete="given-name"></div>
+          <div class="field"><label for="rrEmail">E-mailadres</label><input id="rrEmail" type="email" class="input" data-m="rrEmail" value="${esc(f.email)}" autocomplete="email" placeholder="naam@voorbeeld.nl"></div>
+          <div class="field"><label for="rrCode">Beheerderscode (4 cijfers)</label><input id="rrCode" class="input" inputmode="numeric" maxlength="4" data-m="rrCode" value="${esc(f.code)}" autocomplete="off" placeholder="••••">
+            <p class="muted" style="font-size:.75rem;margin:4px 2px 0">Hiermee log jij en iedereen die je de code geeft in op het beheer van je feest. De code wordt automatisch actief als je feest begint. De hoofdadmin kan hem niet zien.</p></div>
+          <div class="field"><label for="rrStart">Van</label><input id="rrStart" type="datetime-local" class="input" data-m="rrStart" value="${esc(f.start)}"></div>
+          <div class="field"><label for="rrEnd">Tot</label><input id="rrEnd" type="datetime-local" class="input" data-m="rrEnd" value="${esc(f.end)}"></div>
+          <label class="check"><input id="rrApproval" type="checkbox" data-m="rrApproval" ${f.approval ? 'checked' : ''}><span>Nieuwe bezoekers eerst laten goedkeuren door de beheerder</span></label>
+          <button class="btn btn-primary btn-lg btn-block" data-a="sendRoomRequest" data-dis="rr" data-testid="button-send-room-request">Aanvraag versturen</button>
+          <p class="muted" style="font-size:.8rem">Je e-mailadres wordt alleen gebruikt voor deze aanvraag. <a href="privacybeleid.html" style="color:var(--violet);font-weight:700">Privacybeleid</a></p>
+          ${myRequestsHTML()}
+        </div>`);
+    }
+    case 'approveRoom': {
+      const a = S.approve, r = S.data.roomRequests.find(x => x.id === a.id); if (!r) return '';
+      return modal(`${mhead('Aanvraag goedkeuren')}
+        <div class="stack" style="margin-top:12px">
+          <div class="sum"><span>${esc(r.firstName)}</span><span style="font-size:.78rem">${fmtDateTime(r.startAt)} – ${fmtDateTime(r.endAt)}</span></div>
+          ${r.email ? `<div class="sum"><span>${esc(r.email)}</span></div>` : ''}
+          <p class="muted" style="font-size:.85rem">De beheerderscode die de aanvrager koos wordt automatisch actief als de sessie begint. Jij kunt die code niet zien, maar wel altijd een andere code instellen.</p>
+          <label class="check"><input id="approveClear" type="checkbox" data-m="approveClear" ${a.clear ? 'checked' : ''}><span>Kamer leegmaken bij de start (bestellingen, feedback en hulpverzoeken wissen)</span></label>
+          <button class="btn btn-green btn-lg btn-block" data-a="confirmApprove" data-testid="button-confirm-approve">Goedkeuren</button>
+        </div>`);
+    }
+  }
+  return '';
+}
+
+/* ════════════════════════════════════════════════════════════════
+   7. SCHERM: MEDEWERKER-DASHBOARD
+   ════════════════════════════════════════════════════════════════ */
+/* onthoud op dit apparaat de code, zodat bij 'code vergeten' een melding met de code getoond kan worden */
+const rememberCode = code => { if (code && code !== '__main__' && notifyEnabled()) lsSet('notifyCode', code); };
+const notifyRooms = () => lsJson('notifyRooms', []);
+const notifyEnabled = (room = S.roomId) => ('Notification' in window) && Notification.permission === 'granted' && notifyRooms().includes(room);
+const pushStatus = () => !('Notification' in window) ? 'unsupported' : Notification.permission === 'denied' ? 'denied' : notifyEnabled() ? 'on' : 'off';
+
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = 880; g.gain.value = .15;
+    o.connect(g); g.connect(ctx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .5); o.stop(ctx.currentTime + .5);
+  } catch {}
+}
+async function notify(title, body) {
+  title = tr(title); body = tr(body);
+  try {
+    const reg = ('serviceWorker' in navigator) ? await navigator.serviceWorker.getRegistration() : null;
+    if (reg && reg.showNotification) await reg.showNotification(title, {body, tag:'order-' + Date.now(), vibrate:[200,100,200], requireInteraction:true, icon:'icon-192.png', data:{url:'./#/staff'}});
+    else new Notification(title, {body, icon:'icon-192.png'});
+  } catch { try { new Notification(title, {body}); } catch {} }
+  beep();
+}
+function detectNewOrders(next) {
+  const staff = S.route.path === '/staff' && readSession() && notifyEnabled();
+  if (S.knownIds && staff) {
+    next.orders.filter(o => !S.knownIds.has(o.id) && o.status === 'pending')
+      .forEach(o => notify('Nieuwe bestelling!', `${o.customerName} bestelde ${o.drink}.`));
+  }
+  if (S.knownAccess && staff) {
+    (next.access || []).filter(a => !S.knownAccess.has(a.id) && a.status === 'pending')
+      .forEach(a => notify('Toegangsverzoek', `${a.personName} wil naar binnen.`));
+  }
+  S.knownIds = new Set(next.orders.map(o => o.id));
+  S.knownAccess = new Set((next.access || []).map(a => a.id));
+}
+
+function staffLoginHTML() {
+  return `<div class="login"><div class="card">
+    <div class="row" style="margin-bottom:16px"><span class="logo">🔐</span><h1 style="font-size:1.5rem">Admin toegang</h1></div>
+    <p class="muted" style="margin-bottom:16px;font-size:.92rem">Voer de 4-cijferige toegangscode in om door te gaan.</p>
+    <input id="loginInput" type="password" inputmode="numeric" maxlength="4" class="input pin ${S.loginError ? 'err' : ''}" data-m="loginInput" data-enter="staffLoginBtn" placeholder="••••" value="${esc(S.loginInput)}" autocomplete="off">
+    <p id="loginErr" class="${S.loginError ? '' : 'hidden'}" style="color:var(--red-solid);font-size:.8rem;text-align:center;margin-top:8px">Onjuiste code. Probeer opnieuw.</p>
+    <button class="btn btn-primary btn-lg btn-block" style="margin-top:14px" data-a="staffLoginBtn" data-dis="login">Inloggen</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:6px" data-a="openForgot">Code vergeten?</button>
+    <a class="btn btn-ghost btn-block" href="${hrefRoom()}">Terug naar bestellen</a>
+    <div class="center" style="margin-top:8px">${langBtn()}</div>
+  </div></div>${dialogHTML()}`;
+}
+
+const modeBtn = (mode, label, action, id) =>
+  `<button type="button" class="mode ${mode}" data-a="${action}" ${id != null ? `data-id="${id}"` : ''} title="${mode === 'off' ? 'Niet beschikbaar' : mode === 'on' ? 'Klant kan kiezen' : 'Altijd inbegrepen'}">${mode === 'locked' ? ic('lock') : ''}${label}</button>`;
+
+function drinkRowHTML(d) {
+  const editing = S.editPriceId === d.id;
+  return `<div class="drow" data-row="${d.id}">
+    <span class="grip" data-drag="${d.id}" title="Slepen om te sorteren">${ic('grip')}</span>
+    <div class="dn"><span>${emoji(d.icon)}</span><span>${esc(d.name)}</span></div>
+    <div class="ctl">
+      ${editing
+        ? `<input id="priceEdit" class="priceedit" inputmode="decimal" data-m="priceInput" data-enter="blurSelf" data-blur="commitPrice" placeholder="0,00" value="${esc(S.priceInput)}">`
+        : `<button class="pricebtn ${d.priceInCents > 0 ? 'has' : ''}" data-a="editPrice" data-id="${d.id}" title="Prijs bewerken">${ic('euro')}${d.priceInCents > 0 ? fmtPrice(d.priceInCents).slice(1) : '0,00'}</button>`}
+      ${modeBtn(d.iceAvailable, 'Ijs', 'cycleIce', d.id)}
+      ${modeBtn(d.bubblesAvailable, 'Bubbels', 'cycleBub', d.id)}
+      <button class="btn btn-ghost btn-sq" style="color:var(--red-solid)" data-a="deleteDrink" data-id="${d.id}" aria-label="Verwijderen">${ic('trash')}</button>
+    </div></div>`;
+}
+
+function historyHTML() {
+  const price = o => (drinkByName(o.drink) || {}).priceInCents || 0;
+  const all = [...S.data.orders].sort((a,b) => b.id - a.id);
+  const totals = {};
+  for (const o of all) totals[o.customerName] = (totals[o.customerName] || 0) + (o.status === 'declined' ? 0 : price(o));
+  const persons = Object.entries(totals).sort((a,b) => b[1] - a[1]);
+  const anyPrices = all.some(o => price(o) > 0);
+  const grand = all.reduce((s,o) => s + (o.status === 'declined' ? 0 : price(o)), 0);
+  return `<div class="stack" style="margin-top:12px">
+    <div class="card"><h3 style="display:flex;gap:6px;align-items:center;font-size:1rem">${ic('euro')} Overzicht per persoon</h3>
+      ${persons.length === 0 ? '<p class="muted" style="font-style:italic;font-size:.9rem">Geen bestellingen gevonden.</p>' : `<div class="dlist">
+        ${persons.map(([n,t]) => `<div class="sum"><span>${esc(n)}</span><span style="color:${t > 0 ? 'var(--green)' : 'var(--ink-3)'}">${anyPrices ? fmtPrice(t) : all.filter(o => o.customerName === n).length + ' bestelling(en)'}</span></div>`).join('')}
+        ${anyPrices ? `<div class="sum total"><span>Totaal</span><span>${fmtPrice(grand)}</span></div>` : ''}</div>`}
+    </div>
+    <div class="card"><h3 style="font-size:1rem">Alle bestellingen</h3>
+      ${all.length === 0 ? '<p class="muted" style="font-style:italic;font-size:.9rem">Geen bestellingen gevonden.</p>' : `<div style="overflow-x:auto"><table class="tbl">
+        <thead><tr><th>Naam</th><th>Drankje</th>${anyPrices ? '<th class="r">Prijs</th>' : ''}<th>Status</th><th class="r">Tijd</th><th></th></tr></thead>
+        <tbody>${all.map(o => `<tr><td><b>${esc(o.customerName)}</b></td><td>${esc(o.drink)}</td>
+          ${anyPrices ? `<td class="r" style="${o.status === 'declined' ? 'text-decoration:line-through;color:var(--ink-3)' : ''}">${price(o) > 0 ? fmtPrice(price(o)) : '—'}</td>` : ''}
+          <td>${badge(o.status, true)}</td><td class="r mono">${fmtTime(o.createdAt)}</td>
+          <td class="r"><button class="btn btn-ghost btn-sq" style="color:var(--ink-3)" data-a="deleteHistOrder" data-id="${o.id}" title="Verwijder bestelling">${ic('trash')}</button></td></tr>`).join('')}</tbody></table></div>`}
+    </div></div>`;
+}
+
+function viewStaff() {
+  const cfg = S.data.config;
+  if (!S.session) return staffLoginHTML();
+
+  const active = S.data.orders.filter(o => o.status !== 'served').sort((a,b) => a.id - b.id)
+    .sort((a,b) => Number(a.status === 'declined') - Number(b.status === 'declined'));
+  const shown = S.filter === 'all' ? active : active.filter(o => o.status === S.filter);
+  const pendingCount = active.filter(o => o.status === 'pending').length;
+  const unreadHelp = S.data.helpRequests.filter(r => !r.read).length;
+  const helps = [...S.data.helpRequests].sort((a,b) => b.id - a.id);
+  const feeds = [...S.data.feedback].sort((a,b) => b.id - a.id);
+  const ps = pushStatus();
+  const pendingAccess = (S.data.access || []).filter(a => a.status === 'pending' && sessionOk(cfg, a.createdAt)).sort((a, b) => a.id - b.id);
+
+  const action = o => {
+    if (o.status === 'pending') return `<button class="btn btn-sm btn-blue" data-a="advance" data-id="${o.id}">${ic('play')} Begin met maken</button>`;
+    if (o.status === 'making') return `<button class="btn btn-sm btn-green" data-a="advance" data-id="${o.id}">${ic('check')} Markeren als klaar</button>`;
+    if (o.status === 'ready') return `<button class="btn btn-sm btn-out" data-a="advance" data-id="${o.id}">${ic('bell')} Geleverd</button>`;
+    return '';
+  };
+
+  return `<div class="screen">
+    <header class="s-head">
+      <div class="row" style="min-width:0;gap:10px">
+        <span class="logo">${ic('cup')}</span>
+        ${S.editingName
+          ? `<div class="row"><input id="cafeNameInput" class="input" style="min-height:36px" data-m="newCafeName" data-enter="saveCafeName" value="${esc(S.newCafeName)}"><button class="btn btn-sm btn-primary" data-a="saveCafeName">Opslaan</button></div>`
+          : `<h1 data-a="editCafeName" title="Klik om de naam te wijzigen" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(cfg.cafeName)}</h1>`}
+        ${pendingCount > 0 ? `<span class="count pulse">${pendingCount}</span>` : ''}
+        ${unreadHelp > 0 ? `<span class="count orange pulse">${unreadHelp} hulp</span>` : ''}
+        ${pendingAccess.length > 0 ? `<span class="count pulse" style="background:var(--violet)">${pendingAccess.length} toegang</span>` : ''}
+      </div>
+      <div class="row wrap-r" style="gap:4px">
+        ${[['all','Alle'],['pending','Wacht'],['making','Maakt'],['ready','Klaar']].map(([f,l]) => `<button class="btn btn-sm ${S.filter === f ? 'btn-primary' : 'btn-ghost'}" data-a="setFilter" data-f="${f}">${l}</button>`).join('')}
+        ${langBtn()}
+        <a class="btn btn-sm btn-out" href="${hrefRoom()}" aria-label="Naar bestellen">${ic('home')}</a>
+      </div>
+    </header>
+
+    <div class="scroll" id="scroller"><div class="wrap-wide">
+      <div class="ocards">
+        ${shown.map(o => {
+          const dec = o.status === 'declined';
+          return `<article class="ocard ${dec ? 'dec' : ''}">
+            <div class="row between" style="align-items:flex-start">
+              <div><h3 style="font-size:${dec ? '.95rem' : '1.2rem'}">${esc(o.customerName)}</h3><span class="mono">#${String(o.id).padStart(4,'0')}</span></div>
+              ${badge(o.status)}</div>
+            <div class="mid">
+              <div class="row" style="font-weight:700"><span>${emoji((drinkByName(o.drink) || {}).icon)}</span>${esc(o.drink)}</div>
+              ${(o.withIce || o.withBubbles) ? `<div class="row wrap-r" style="margin-top:8px;gap:6px">${o.withIce ? '<span class="pill pill-ice">❄️ Met ijs</span>' : ''}${o.withBubbles ? '<span class="pill pill-bub">🫧 Met bubbels</span>' : ''}</div>` : ''}
+              ${o.notes ? `<div class="nt">"${esc(o.notes)}"</div>` : ''}
+              ${dec && o.declineReason ? `<p style="margin-top:6px;font-size:.8rem;color:var(--red);font-weight:700">Reden: ${esc(o.declineReason)}</p>` : ''}
+            </div>
+            <div class="row between wrap-r">
+              <span class="mono">${new Date(o.createdAt).toLocaleTimeString(LOC())}</span>
+              <div class="row wrap-r" style="gap:6px">
+                ${action(o)}
+                ${!dec ? `<button class="btn btn-sm btn-danger-out" data-a="openDecline" data-id="${o.id}">${ic('xc')} Weigeren</button>`
+                       : `<button class="btn btn-sm btn-ghost" style="color:var(--red)" data-a="deleteOrderFull" data-id="${o.id}">${ic('trash')} Volledig verwijderen</button>`}
+              </div></div></article>`;
+        }).join('')}
+      </div>
+      ${shown.length === 0 ? `<div class="empty" style="margin-top:8px"><div class="e">☕</div><h3>Geen bestellingen in deze wachtrij</h3></div>` : ''}
+
+      <div class="card" style="margin-top:28px;border-color:#fed7aa">
+        <h3 style="display:flex;gap:8px;align-items:center">${ic('hand')} Hulpverzoeken ${unreadHelp > 0 ? `<span class="count orange">${unreadHelp} nieuw</span>` : ''}</h3>
+        <div class="dlist" style="max-height:240px;overflow:auto">
+          ${helps.length === 0 ? '<p class="muted" style="font-style:italic;font-size:.9rem">Geen hulpverzoeken op dit moment.</p>' : helps.map(r => `
+            <div class="fb help ${r.read ? 'read' : 'unread'}" style="align-items:center"><div><b style="font-size:.92rem">${esc(r.customerName)}</b>
+              <div class="mono">${new Date(r.createdAt).toLocaleTimeString(LOC())}${r.read ? ' • Afgehandeld' : ''}</div></div>
+              <div class="row" style="gap:2px">${!r.read ? `<button class="btn btn-ghost btn-sq" style="color:#16a34a" data-a="markHelp" data-id="${r.id}" title="Markeer als afgehandeld">${ic('check')}</button>` : ''}
+              <button class="btn btn-ghost btn-sq" style="color:var(--red-solid)" data-a="deleteHelp" data-id="${r.id}" title="Verwijderen">${ic('trash')}</button></div></div>`).join('')}
+        </div></div>
+
+      <div class="card" style="margin-top:16px;border-color:#c4b3fa"><h3 style="display:flex;gap:8px;align-items:center">${ic('user')} Toegangsverzoeken ${pendingAccess.length ? `<span class="count">${pendingAccess.length}</span>` : ''}</h3>
+        <div class="dlist" id="access-list">
+          ${pendingAccess.length === 0 ? '<p class="muted" style="font-style:italic;font-size:.9rem">Geen verzoeken. Nieuwe bezoekers verschijnen hier als goedkeuring is ingeschakeld.</p>' : pendingAccess.map(a => `
+            <div class="fb unread" style="align-items:center"><div><b>${esc(a.personName)}</b><div class="mono">${new Date(a.createdAt).toLocaleTimeString(LOC())}</div></div>
+              <div class="row" style="gap:6px"><button class="btn btn-sm btn-green" data-a="approveAccess" data-id="${a.id}">${ic('check')} Toelaten</button>
+              <button class="btn btn-sm btn-danger-out" data-a="denyAccess" data-id="${a.id}">${ic('x')} Weigeren</button></div></div>`).join('')}
+        </div></div>
+
+      <h2 class="sec-title">Instellingen</h2>
+      <div class="sgrid">
+        <div class="card"><h3>Drankje toevoegen</h3><div class="stack">
+          <input id="ndName" class="input" data-m="ndName" data-enter="addDrink" placeholder="Naam" value="${esc(S.nd.name)}">
+          <select id="ndIcon" class="select" data-m="ndIcon">${ICON_OPTIONS.map(i => `<option value="${i}" ${S.nd.icon === i ? 'selected' : ''}>${emoji(i)}  ${esc(ICON_NAMES[i])}</option>`).join('')}</select>
+          <div><p class="muted" style="font-size:.76rem;font-weight:700;margin-bottom:6px">Opties voor klant (klik om te wisselen):</p>
+            <div class="row wrap-r">
+              ${modeBtn(S.nd.ice, 'Ijs ' + (S.nd.ice === 'locked' ? '(vast)' : S.nd.ice === 'on' ? '(keuze)' : '(uit)'), 'ndIce')}
+              ${modeBtn(S.nd.bubbles, 'Bubbels ' + (S.nd.bubbles === 'locked' ? '(vast)' : S.nd.bubbles === 'on' ? '(keuze)' : '(uit)'), 'ndBub')}
+            </div></div>
+          <button class="btn btn-primary btn-block" data-a="addDrink">${ic('plus')} Toevoegen</button></div></div>
+
+        <div class="card"><h3>Bestelmodus</h3>
+          <div class="sum"><span>Multi-bestellen (mandje)</span>
+            <button class="btn btn-sm ${cfg.multiDrinkMode === 'on' ? 'btn-primary' : 'btn-out'}" data-a="toggleMulti">${cfg.multiDrinkMode === 'on' ? 'Aan' : 'Uit'}</button></div>
+          <p class="muted" style="font-size:.74rem;font-style:italic;margin-top:10px">Aan: meerdere drankjes selecteren via het mandje.<br>Uit: het drankje wordt direct besteld bij een tik.</p></div>
+
+        <div class="card" style="${cfg.orderingOpen ? '' : 'background:var(--red-bg);border-color:var(--red-bd)'}"><h3 style="margin-bottom:4px">Bestellingen</h3>
+          <p class="muted" style="font-size:.78rem;margin-bottom:14px">${cfg.orderingOpen ? 'Klanten kunnen nu bestellingen plaatsen.' : 'Bestellingen zijn gesloten.'}</p>
+          <button class="btn btn-block ${cfg.orderingOpen ? 'btn-danger' : 'btn-primary'}" data-a="toggleOpen" data-testid="button-toggle-ordering">${cfg.orderingOpen ? 'Bestellingen sluiten' : 'Bestellingen openen'}</button></div>
+
+        <div class="card"><h3 style="margin-bottom:4px">Nieuwe bezoekers</h3>
+          <p class="muted" style="font-size:.78rem;margin-bottom:12px">${cfg.requireApproval ? 'Wie voor het eerst in deze sessie binnenkomt, moet eerst door jou worden toegelaten.' : 'Iedereen mag zonder goedkeuring binnen.'}</p>
+          <button class="btn btn-block ${cfg.requireApproval ? 'btn-primary' : 'btn-out'}" data-a="toggleApproval" data-testid="button-toggle-approval">${cfg.requireApproval ? 'Goedkeuring aan' : 'Goedkeuring uit'}</button>
+          ${cfg.hostName ? `<p class="muted" style="font-size:.72rem;margin-top:10px">Sessie van ${esc(cfg.hostName)}, tot ${fmtDateTime(cfg.sessionEnd)}.</p>` : ''}</div>
+
+        <div class="card"><h3 style="margin-bottom:4px">Meldingen</h3>
+          <p class="muted" style="font-size:.78rem;margin-bottom:12px">${ps === 'on' ? 'Je krijgt een melding bij elke nieuwe bestelling en als iemand "code vergeten" kiest, zolang de app open staat op dit apparaat.' : ps === 'denied' ? 'Meldingen zijn geblokkeerd door je browser. Pas dit aan in de browserinstellingen.' : ps === 'unsupported' ? 'Je browser ondersteunt geen meldingen.' : 'Schakel meldingen in om een melding te krijgen bij elke nieuwe bestelling.'}</p>
+          ${ps === 'on' || ps === 'off' ? `<div class="stack"><button class="btn btn-block ${ps === 'on' ? 'btn-out' : 'btn-primary'}" data-a="togglePush">${ic('bell')} ${ps === 'on' ? 'Meldingen uitschakelen' : 'Meldingen inschakelen'}</button>
+            ${ps === 'on' ? '<button class="btn btn-sm btn-ghost btn-block" data-a="testPush">Stuur een testmelding</button>' : ''}</div>` : ''}
+          ${ps === 'on' ? '<p style="font-size:.7rem;color:#16a34a;font-weight:800;text-align:center;margin-top:8px">✓ Meldingen zijn ingeschakeld</p>' : ''}
+          <p class="muted" style="font-size:.68rem;margin-top:10px">Met een volledig gesloten app komen meldingen pas als er een aparte pushserver is gekoppeld.</p></div>
+
+        <div class="card"><h3>Toegangscode</h3>
+          ${S.editingCode ? `<div class="row"><input id="newStaffCode" class="input" inputmode="numeric" maxlength="4" data-m="newStaffCode" data-enter="saveCode" placeholder="Nieuwe code" value="${esc(S.newStaffCode)}"><button class="btn btn-primary" data-a="saveCode">Opslaan</button></div>`
+            : '<button class="btn btn-out btn-block" data-a="editCode">Wijzigen</button>'}</div>
+
+        <div class="card" style="border-color:var(--red-bd)"><h3 style="color:var(--red)">Database</h3>
+          <button class="btn btn-danger btn-sm btn-block" data-a="clearOrders">Alles verwijderen</button>
+          <p class="muted" style="font-size:.7rem;margin-top:8px">Verwijdert alle bestellingen.</p></div>
+      </div>
+
+      <div style="margin-top:24px">
+        <button class="card btn-block row between" style="text-align:left" data-a="toggleHistory">
+          <span class="row" style="font-family:var(--font-display);font-weight:600;font-size:1.1rem">${ic('clip')} Bestellingen overzicht ${S.data.orders.length ? `<span class="muted" style="font-family:var(--font-body);font-weight:500;font-size:.85rem">(${S.data.orders.length} bestellingen)</span>` : ''}</span>
+          ${ic(S.showHistory ? 'up' : 'down')}</button>
+        ${S.showHistory ? historyHTML() : ''}
+      </div>
+
+      <div class="card" style="margin-top:24px"><h3 style="display:flex;gap:8px;align-items:center">${ic('msg')} Klant feedback</h3>
+        <div class="dlist" style="max-height:240px;overflow:auto">
+          ${feeds.length === 0 ? '<p class="muted" style="font-style:italic;font-size:.9rem">Nog geen feedback ontvangen.</p>' : feeds.map(f => `
+            <div class="fb ${f.read ? 'read' : 'unread'}"><div style="min-width:0"><p style="white-space:pre-wrap;font-size:.9rem;word-break:break-word">${esc(f.content)}</p>
+              <span class="mono">${new Date(f.createdAt).toLocaleString(LOC())}${f.read ? ' • Gelezen' : ''}</span></div>
+              <div class="row" style="flex-direction:column;gap:2px">${!f.read ? `<button class="btn btn-ghost btn-sq" style="color:#2563eb" data-a="markFeedback" data-id="${f.id}" title="Markeer als gelezen">${ic('eye')}</button>` : ''}
+              <button class="btn btn-ghost btn-sq" style="color:var(--red-solid)" data-a="deleteFeedback" data-id="${f.id}" title="Verwijderen">${ic('trash')}</button></div></div>`).join('')}
+        </div></div>
+
+      <div class="card" style="margin-top:24px"><h3 style="margin-bottom:2px">Beschikbare drankjes</h3>
+        <p class="muted" style="font-size:.76rem;margin-bottom:12px">Sleep een drankje om de volgorde te wijzigen. Klanten zien dezelfde volgorde.</p>
+        <div class="dlist" id="drinklist">${S.data.drinks.map(drinkRowHTML).join('')}</div>
+        ${S.data.drinks.length === 0 ? '<p class="muted" style="font-style:italic;font-size:.9rem">Nog geen drankjes. Voeg er één toe hierboven.</p>' : ''}</div>
+    </div></div>
+    ${dialogHTML()}
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   8. SCHERM: HORLOGE (/#/watch)
+   ════════════════════════════════════════════════════════════════ */
+function detectWatch() {
+  if (S.route.query && 'watch' in S.route.query) return true;
+  const ua = navigator.userAgent;
+  if (/SM-R\d{3}/i.test(ua) || /wearable|wear[\s-]?os/i.test(ua)) return true;
+  if (screen.width <= 500 && screen.height <= 500) return true;
+  return innerWidth > 0 && innerWidth <= 500 && innerHeight <= 500;
+}
+const W_NEXT = {pending:'making', making:'ready', ready:'served'};
+const W_LABEL = {pending:'Wacht op bereiding', making:'Aan het maken', ready:'Klaar om te leveren'};
+const W_ACTION = {pending:'Begin', making:'Klaar', ready:'Afleveren'};
+const W_COLOR = {pending:'#f59e0b', making:'#3b82f6', ready:'#22c55e'};
+const watchOrders = () => S.data.orders.filter(o => o.status !== 'served' && o.status !== 'declined').sort((a,b) => a.id - b.id);
+
+function watchFace() {
+  if (!S.w.auth) {
+    const rows = [['1','2','3'],['4','5','6'],['7','8','9'],['←','0','']];
+    return `<div class="abs" style="padding-top:52px">
+      <p style="color:#ffffff77;font-size:11px;letter-spacing:.08em;margin-bottom:10px">${esc(S.data.config.cafeName)}</p>
+      <div class="dots ${S.w.err ? 'err' : ''}">${[0,1,2,3].map(i => `<i class="${i < S.w.pin.length ? 'f' : ''}"></i>`).join('')}</div>
+      <div class="keys">${rows.flat().map(b => b === '' ? '<div></div>' : `<button class="key ${b === '←' ? 'del' : ''}" data-a="${b === '←' ? 'wDelete' : 'wDigit'}" data-d="${b}">${b}</button>`).join('')}</div></div>`;
+  }
+  const list = watchOrders(), o = list[0];
+  if (!o) return `<div class="abs" style="justify-content:center"><div style="font-size:40px;opacity:.2;margin-bottom:10px">☕</div><p style="color:#ffffff44;font-size:13px">Geen bestellingen</p></div>`;
+  const c = W_COLOR[o.status];
+  return `<div class="abs wcard" data-a="wAdvance">
+    ${list.length > 1 ? `<div style="position:absolute;top:70px;display:flex;gap:5px">${list.slice(0,8).map((_,i) => `<div style="width:${i === 0 ? 14 : 5}px;height:5px;border-radius:3px;background:${i === 0 ? '#fff' : '#333'}"></div>`).join('')}</div>` : ''}
+    <p style="color:${c};font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:10px">${W_LABEL[o.status]}</p>
+    <p style="font-size:28px;font-weight:800;text-align:center;max-width:240px;line-height:1.15;margin-bottom:4px">${esc(o.drink)}</p>
+    <p style="color:#888;font-size:13px;font-weight:500;margin-bottom:20px">${esc(o.customerName)}</p>
+    ${(o.withIce || o.withBubbles) ? `<div style="display:flex;gap:6px;margin-bottom:12px">
+      ${o.withIce ? '<span style="font-size:10px;color:#93c5fd;background:#1e3a5f;border-radius:8px;padding:2px 8px;font-weight:600">❄ Ijs</span>' : ''}
+      ${o.withBubbles ? '<span style="font-size:10px;color:#86efac;background:#14532d;border-radius:8px;padding:2px 8px;font-weight:600">◉ Bubbels</span>' : ''}</div>` : ''}
+    <div style="padding:9px 22px;border-radius:24px;background:${c}20;border:1.5px solid ${c}55"><span style="color:${c};font-size:14px;font-weight:700">${W_ACTION[o.status]} →</span></div>
+    ${list.length > 1 ? `<p style="position:absolute;bottom:68px;color:#555;font-size:10px">1 van ${list.length}</p>` : ''}
+  </div>`;
+}
+function viewWatch() {
+  if (detectWatch()) {
+    const sc = Math.min(innerWidth, innerHeight) / 360;
+    return `<div class="watch-fixed"><div class="face" style="transform:scale(${sc})">${watchFace()}</div></div>`;
+  }
+  return `<div class="watch-page"><div class="bezel"><div class="face">${watchFace()}</div></div>
+    <p style="color:#555;font-size:11px;letter-spacing:.1em;font-weight:500">Voorbeeld horlogescherm</p>
+    <a href="${hrefRoom()}" style="color:#666;font-size:12px">← Terug naar bestellen</a></div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   9. ACTIES (alles wat je kunt aantikken)
+   ════════════════════════════════════════════════════════════════ */
+const root = $('#app');
+const go = path => { location.hash = '#' + path; };
+const cfgNow = () => S.data.config;
+const confirmed = msg => window.confirm(tr(msg));
+const snapOpts = () => ({staff:S.route.path === '/staff', main:S.route.path === '/main', deviceId:getDeviceId()});
+
+async function refresh() {            // na een eigen actie: gegevens verversen en direct tekenen
+  const snap = await DB.getSnapshot(snapOpts());
+  S.sig = JSON.stringify(snap); S.data = snap;
+  detectNewOrders(snap); syncSession(); render();
+}
+function syncSession() {      // hoofdadmin-sessie moet nog geldig zijn
+  if (S.session === '__main__' && !readMain()) { clearSession(); S.session = null; }
+}
+async function verifySession() {   // klopt de code nog? (de hoofdadmin kan hem gewijzigd hebben)
+  if (!S.session || S.session === '__main__') return;
+  let ok = true; try { ok = await DB.checkStaffCode(S.session); } catch {}
+  if (!ok) { clearSession(); S.session = null; }
+}
+const run = fn => async (...a) => { try { await fn(...a); } catch (e) { fail(e); } };
+
+const incrementOrderCount = ids => {
+  for (const id of ids) S.orderCounts[id] = (S.orderCounts[id] || 0) + 1;
+  lsSet('orderCounts', JSON.stringify(S.orderCounts));
+};
+const joinNames = names => names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} en ${names[1]}` : `${names.slice(0,-1).join(', ')} en ${names[names.length-1]}`;
+
+async function submitOrders(list) {
+  const name = S.name.trim();
+  if (!name) { toast('Voer eerst uw naam in', '', true); return; }
+  if (S.data.config.orderingOpen === false) { toast('Bestellen is gesloten', '', true); return; }
+  if (S.placing) return;
+  let deviceId = lsGet('deviceId'); if (!deviceId) { deviceId = uid(); lsSet('deviceId', deviceId); }
+  S.placing = true; render();
+  try {
+    for (const d of list) {
+      const o = await DB.createOrder({customerName:name, drink:d.name, notes:S.notes, deviceId, withIce:d.withIce, withBubbles:d.withBubbles});
+      if (S.knownIds) S.knownIds.add(o.id);
+    }
+  } catch (e) { S.placing = false; fail(e); render(); return; }
+  S.placing = false;
+  incrementOrderCount(list.map(d => d.drinkId));
+  const names = list.map(d => d.name);
+  toast('Bestelling geplaatst!', names.length === 1 ? `Je ${names[0]} wordt bereid.` : `Je ${joinNames(names)} worden bereid.`);
+  S.notes = ''; S.selected = [];
+  try { const snap = await DB.getSnapshot(snapOpts()); S.sig = JSON.stringify(snap); S.data = snap; } catch {}
+  go(rp('/track?name=' + encodeURIComponent(name)));
+}
+
+const openDialog = (dlg, focusId) => { S.dialog = dlg; S.menuOpen = false; S.animate = true; if (focusId) S.focusId = focusId; render(); };
+
+const ACTIONS = {
+  /* algemeen */
+  backdrop(el, e) { if (e.target !== el) return; if (el.dataset.close === 'menu') S.menuOpen = false; else S.dialog = null; render(); },
+  closeDialog() { S.dialog = null; render(); },
+  openMenu() { S.menuOpen = true; S.animate = true; render(); },
+  closeMenu() { S.menuOpen = false; render(); },
+  dismissDecline(el) {
+    S.dismissed.add(+el.dataset.id); lsSet('dismissedDeclines', JSON.stringify([...S.dismissed])); render();
+  },
+  blurSelf(el) { el.blur(); },
+
+  /* klant: naam & menu */
+  changeName() { S.name = ''; S.nameDraft = ''; S.nameConfirmed = false; S.menuOpen = false; S.focusId = 'gateName'; render(); },
+  confirmName() {
+    const t = S.nameDraft.trim(); if (!t) return;
+    S.name = t; S.helpName = t; S.nameConfirmed = true; lsSet('customerName', t); render(); ensureAccess();
+  },
+  openFeedback() { openDialog({type:'feedback'}, 'feedbackText'); },
+  sendFeedback: run(async () => {
+    await DB.createFeedback(S.feedbackText);
+    S.feedbackText = ''; S.dialog = null; toast('Bedankt voor je feedback!'); await refresh();
+  }),
+  openHelp() { if (S.name.trim()) S.helpName = S.name; openDialog({type:'help'}, 'helpName'); },
+  sendHelp: run(async () => {
+    if (!S.helpName.trim()) return;
+    await DB.createHelpRequest(S.helpName);
+    S.dialog = null; toast('Hulpverzoek verstuurd', 'Een medewerker komt naar je toe.'); await refresh();
+  }),
+  openSpend() { openDialog({type:'spend'}); },
+  openStaff() { S.staffCodeInput = ''; openDialog({type:'staffcode'}, 'staffCodeInput'); },
+  staffLogin: run(async () => {
+    if (await DB.checkStaffCode(S.staffCodeInput)) {
+      rememberCode(S.staffCodeInput);
+      writeSession(S.staffCodeInput); S.session = S.staffCodeInput; S.dialog = null; S.menuOpen = false; S.staffCodeInput = '';
+      go(rp('/staff'));
+    } else toast('Ongeldige toegangscode', '', true);
+  }),
+
+  /* klant: drankjes kiezen */
+  filterMost() { S.mostOrdered = !S.mostOrdered; S.filters = []; render(); },
+  filterAll() { S.mostOrdered = false; S.filters = []; render(); },
+  filterIcon(el) {
+    const i = el.dataset.icon; S.mostOrdered = false;
+    S.filters = S.filters.includes(i) ? S.filters.filter(x => x !== i) : [...S.filters, i]; render();
+  },
+  pickDrink(el) {
+    const d = drinkById(+el.dataset.id); if (!d) return;
+    const multi = cfgNow().multiDrinkMode === 'on';
+    if (multi && S.selected.some(s => s.drinkId === d.id)) { S.selected = S.selected.filter(s => s.drinkId !== d.id); render(); return; }
+    if (!multi && !S.name.trim()) { toast('Voer eerst uw naam in', '', true); S.focusId = 'name'; render(); return; }
+    if (d.iceAvailable === 'off' && d.bubblesAvailable === 'off') {
+      const item = {drinkId:d.id, name:d.name, icon:d.icon, withIce:false, withBubbles:false};
+      if (!multi) submitOrders([item]); else { S.selected.push(item); render(); }
+      return;
+    }
+    openDialog({type:'options', drinkId:d.id, ice:d.iceAvailable === 'locked', bubbles:d.bubblesAvailable === 'locked'});
+  },
+  toggleIce() { S.dialog.ice = !S.dialog.ice; render(); },
+  toggleBub() { S.dialog.bubbles = !S.dialog.bubbles; render(); },
+  optsConfirm() {
+    const dr = drinkById(S.dialog.drinkId); if (!dr) { S.dialog = null; render(); return; }
+    const withIce = dr.iceAvailable === 'locked' ? true : dr.iceAvailable === 'off' ? false : S.dialog.ice;
+    const withBubbles = dr.bubblesAvailable === 'locked' ? true : dr.bubblesAvailable === 'off' ? false : S.dialog.bubbles;
+    S.dialog = null;
+    const item = {drinkId:dr.id, name:dr.name, icon:dr.icon, withIce, withBubbles};
+    if (cfgNow().multiDrinkMode !== 'on') { submitOrders([item]); return; }
+    const i = S.selected.findIndex(s => s.drinkId === dr.id);
+    if (i >= 0) S.selected[i] = item; else S.selected.push(item);
+    render();
+  },
+  placeOrder() { if (S.selected.length) submitOrders([...S.selected]); },
+
+  /* klant: bestelling volgen/wijzigen */
+  editOrder(el) {
+    const o = S.data.orders.find(x => x.id === +el.dataset.id); if (!o) return;
+    openDialog({type:'editOrder', id:o.id, drink:o.drink, ice:o.withIce, bubbles:o.withBubbles, notes:o.notes || '', confirmDelete:false});
+  },
+  editPick(el) {
+    const d = drinkByName(el.dataset.name);
+    S.dialog.drink = el.dataset.name;
+    S.dialog.ice = d ? d.iceAvailable === 'locked' : false; S.dialog.bubbles = d ? d.bubblesAvailable === 'locked' : false;
+    render();
+  },
+  editIce() { S.dialog.ice = !S.dialog.ice; render(); },
+  editBub() { S.dialog.bubbles = !S.dialog.bubbles; render(); },
+  saveEdit: run(async () => {
+    const d = S.dialog, o = S.data.orders.find(x => x.id === d.id);
+    if (!o || o.status !== 'pending') { S.dialog = null; toast('Deze bestelling is al in behandeling', 'Wijzigen kan niet meer.', true); await refresh(); return; }
+    const dr = drinkByName(d.drink);
+    const ice = dr ? (dr.iceAvailable === 'locked' ? true : dr.iceAvailable === 'off' ? false : d.ice) : false;
+    const bub = dr ? (dr.bubblesAvailable === 'locked' ? true : dr.bubblesAvailable === 'off' ? false : d.bubbles) : false;
+    await DB.updateOrder(d.id, {drink:d.drink, notes:d.notes, withIce:ice, withBubbles:bub});
+    S.dialog = null; toast('Bestelling gewijzigd'); await refresh();
+  }),
+  askDelete() { S.dialog.confirmDelete = true; render(); },
+  cancelDelete() { S.dialog.confirmDelete = false; render(); },
+  deleteMyOrder: run(async () => {
+    await DB.deleteOrder(S.dialog.id); S.dialog = null; toast('Bestelling verwijderd'); await refresh();
+  }),
+
+  /* medewerker */
+  staffLoginBtn: run(async () => {
+    if (await DB.checkStaffCode(S.loginInput)) {
+      rememberCode(S.loginInput);
+      writeSession(S.loginInput); S.session = S.loginInput; S.loginInput = ''; S.loginError = false; render();
+    } else { S.loginError = true; S.focusId = 'loginInput'; render(); }
+  }),
+  openForgot() { openDialog({type:'forgot'}); },
+  setFilter(el) { S.filter = el.dataset.f; render(); },
+  editCafeName() { S.editingName = true; S.newCafeName = cfgNow().cafeName; S.focusId = 'cafeNameInput'; render(); },
+  saveCafeName: run(async () => { await DB.updateConfig({cafeName:S.newCafeName}); S.editingName = false; await refresh(); }),
+  advance: run(async el => {
+    const o = S.data.orders.find(x => x.id === +el.dataset.id); if (!o || !W_NEXT[o.status]) return;
+    await DB.updateOrderStatus(o.id, W_NEXT[o.status]); await refresh();
+  }),
+  openDecline(el) { S.declineChoice = ''; S.declineCustom = ''; openDialog({type:'decline', id:+el.dataset.id}); },
+  confirmDecline: run(async () => {
+    const reason = S.declineChoice === 'custom' ? S.declineCustom.trim() : S.declineChoice; if (!reason) return;
+    await DB.updateOrderStatus(S.dialog.id, 'declined', reason);
+    S.dialog = null; S.declineChoice = ''; S.declineCustom = ''; await refresh();
+  }),
+  deleteOrderFull: run(async el => {
+    if (!confirmed('Deze geweigerde bestelling volledig verwijderen? Dit kan niet ongedaan worden gemaakt.')) return;
+    await DB.deleteOrder(+el.dataset.id); await refresh();
+  }),
+  markHelp: run(async el => { await DB.markHelpRead(+el.dataset.id); await refresh(); }),
+  deleteHelp: run(async el => { await DB.deleteHelp(+el.dataset.id); await refresh(); }),
+  markFeedback: run(async el => { await DB.markFeedbackRead(+el.dataset.id); await refresh(); }),
+  deleteFeedback: run(async el => { if (!confirmed('Verwijderen?')) return; await DB.deleteFeedback(+el.dataset.id); await refresh(); }),
+  ndIce() { S.nd.ice = cycleMode(S.nd.ice); render(); },
+  ndBub() { S.nd.bubbles = cycleMode(S.nd.bubbles); render(); },
+  addDrink: run(async () => {
+    await DB.createDrink({name:S.nd.name, icon:S.nd.icon, iceAvailable:S.nd.ice, bubblesAvailable:S.nd.bubbles});
+    toast('Drankje toegevoegd', S.nd.name.trim());
+    S.nd = {name:'', icon:'CupSoda', ice:'on', bubbles:'on'}; await refresh();
+  }),
+  toggleMulti: run(async () => { await DB.updateConfig({multiDrinkMode:cfgNow().multiDrinkMode === 'on' ? 'off' : 'on'}); await refresh(); }),
+  toggleOpen: run(async () => { await DB.updateConfig({orderingOpen:!cfgNow().orderingOpen}); await refresh(); }),
+  togglePush: run(async () => {
+    let list = notifyRooms();
+    if (pushStatus() === 'on') list = list.filter(x => x !== S.roomId);
+    else {
+      const p = await Notification.requestPermission();
+      if (p !== 'granted') { render(); return; }
+      await initCodeReqLast(); list = [...new Set([...list, S.roomId])];
+      if (S.session && S.session !== '__main__') lsSet('notifyCode', S.session);
+    }
+    lsSet('notifyRooms', JSON.stringify(list)); render();
+  }),
+  testPush() { notify('Test melding 🔔', 'Als je dit ziet, werken de meldingen correct!'); },
+  editCode() { S.editingCode = true; S.newStaffCode = ''; S.focusId = 'newStaffCode'; render(); },
+  saveCode: run(async () => {
+    await DB.updateConfig({staffCode:S.newStaffCode});
+    rememberCode(S.newStaffCode); writeSession(S.newStaffCode); S.session = S.newStaffCode;
+    S.editingCode = false; S.newStaffCode = ''; toast('Toegangscode gewijzigd'); await refresh();
+  }),
+  clearOrders: run(async () => {
+    if (!confirmed('Ben je zeker dat je ALLE bestellingen wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) return;
+    await DB.clearAllOrders(); toast('Alle bestellingen verwijderd'); await refresh();
+  }),
+  toggleHistory() { S.showHistory = !S.showHistory; render(); },
+  deleteHistOrder: run(async el => { await DB.deleteOrder(+el.dataset.id); await refresh(); }),
+  editPrice(el) {
+    const d = drinkById(+el.dataset.id); if (!d) return;
+    S.editPriceId = d.id; S.priceInput = fmtPrice(d.priceInCents || 0).replace('€', ''); S.focusId = 'priceEdit'; render();
+  },
+  commitPrice: run(async () => {
+    if (S.editPriceId == null) return;
+    const id = S.editPriceId, cents = parsePrice(S.priceInput); S.editPriceId = null;
+    const d = drinkById(id); if (d && d.priceInCents !== cents) await DB.updateDrink(id, {priceInCents:cents});
+    await refresh();
+  }),
+  cycleIce: run(async el => { const d = drinkById(+el.dataset.id); await DB.updateDrink(d.id, {iceAvailable:cycleMode(d.iceAvailable)}); await refresh(); }),
+  cycleBub: run(async el => { const d = drinkById(+el.dataset.id); await DB.updateDrink(d.id, {bubblesAvailable:cycleMode(d.bubblesAvailable)}); await refresh(); }),
+  deleteDrink: run(async el => {
+    const d = drinkById(+el.dataset.id); if (!d || !confirmed(`"${d.name}" verwijderen uit het menu?`)) return;
+    await DB.deleteDrink(d.id); await refresh();
+  }),
+
+  /* taal, bar, hoofdadmin */
+  toggleLang() { S.lang = S.lang === 'en' ? 'nl' : 'en'; lsSet('lang', S.lang); document.documentElement.lang = S.lang; render(); },
+  secretTap() {
+    const n = Date.now(); S.secretTaps = S.secretTaps.filter(t => n - t < 2000); S.secretTaps.push(n);
+    if (S.secretTaps.length >= 3) { S.secretTaps = []; S.mainCode = ''; openDialog({type:'mainLogin'}, 'mainCodeInput'); }
+  },
+  mainLogin: run(async () => {
+    if (await DB.checkMainCode(S.mainCode)) { writeMain(); S.dialog = null; S.mainCode = ''; go('/main'); }
+    else toast('Ongeldige code', '', true);
+  }),
+  mainLogout() { clearMain(); go('/'); },
+  editMainCode() { S.mainEditing = true; S.newMainCode = ''; S.focusId = 'newMainCode'; render(); },
+  saveMainCode: run(async () => { await DB.setMainCode(S.newMainCode); S.mainEditing = false; S.newMainCode = ''; toast('Hoofdcode gewijzigd'); await refresh(); }),
+  toggleLock: run(async () => {
+    const c = cfgNow();
+    // zichtbaar -> op slot. Niet zichtbaar (op slot of buiten de sessietijd) -> echt openzetten, ook een oude sessietijd wissen
+    if (roomVisible(c)) await DB.updateConfig({locked:true});
+    else await DB.updateConfig({locked:false, sessionStart:null, sessionEnd:null, hostName:null});
+    await refresh();
+  }),
+  openRoomAdmin() { writeSession('__main__'); S.session = '__main__'; go('/staff'); },
+  changeRoomCode: run(async () => {
+    const v = window.prompt(tr('Nieuwe 4-cijferige code voor de kamer'));
+    if (v == null) return;
+    await DB.updateConfig({staffCode:v.trim()}); toast('Code gewijzigd'); await refresh();
+  }),
+  stopSession: run(async () => {
+    if (!confirmed('Weet je zeker dat je de lopende sessie wilt stopzetten en weggooien? De kamer gaat meteen op slot.')) return;
+    await DB.updateConfig({sessionStart:null, sessionEnd:null, hostName:null, requireApproval:false, locked:true});
+    for (const q of S.data.roomRequests) if (q.status === 'approved' && q.applied && Date.parse(q.endAt) > Date.now()) await DB.updateRoomRequest(q.id, {status:'stopped'});
+    toast('Sessie stopgezet'); await refresh();
+  }),
+  revokeRequest: run(async el => {
+    if (!confirmed('Weet je zeker dat je de goedkeuring wilt intrekken? De aanvraag wordt dan niet goedgekeurd.')) return;
+    await DB.updateRoomRequest(+el.dataset.id, {status:'denied'}); toast('Goedkeuring ingetrokken'); await refresh();
+  }),
+  deleteMyData: run(async () => {
+    if (!confirmed('Weet je zeker dat je jouw gegevens wilt verwijderen? Je bestellingen, hulpverzoeken en aanvragen van dit apparaat worden gewist en je naam wordt vergeten.')) return;
+    await DB.deleteMyData(getDeviceId(), S.name.trim());
+    const keep = lsGet('lang'); try { localStorage.clear(); } catch {}
+    if (keep) lsSet('lang', keep);
+    sessionStorage.setItem('toastAfter', 'Je gegevens zijn verwijderd.');
+    location.hash = '#/'; location.reload();
+  }),
+  openPrivacy() { location.href = 'privacybeleid.html'; },
+  openRoomRequest() {
+    const pad = n => String(n).padStart(2, '0');
+    const loc = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const s = new Date(); s.setHours(13, 0, 0, 0); if (s < new Date()) s.setDate(s.getDate() + 1);
+    S.rr = {name:S.name || '', email:'', code:'', start:loc(s), end:loc(new Date(s.getTime() + 864e5)), approval:true};
+    openDialog({type:'requestRoom'}, 'rrName');
+  },
+  sendRoomRequest: run(async () => {
+    const f = S.rr, s = new Date(f.start), e = new Date(f.end);
+    if (!f.name.trim()) throw new Error('Vul je voornaam in.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) throw new Error('Vul een geldig e-mailadres in.');
+    if (!/^\d{4}$/.test(f.code)) throw new Error('De code moet uit 4 cijfers bestaan.');
+    if (isNaN(s) || isNaN(e)) throw new Error('Kies een begin- en eindtijd.');
+    if (e <= s) throw new Error('De eindtijd moet na de begintijd liggen.');
+    if (e - s > 864e5 + 6e4) throw new Error('Een feest kan maximaal 24 uur duren.');
+    if (e <= new Date()) throw new Error('De eindtijd ligt al in het verleden.');
+    await DB.createRoomRequest({firstName:f.name, email:f.email, code:f.code, startAt:s.toISOString(), endAt:e.toISOString(), requireApproval:f.approval, deviceId:getDeviceId()});
+    S.dialog = null; toast('Aanvraag verstuurd', 'De hoofdadmin beslist of het doorgaat.'); await refresh();
+  }),
+  openApprove(el) {
+    S.approve = {id:+el.dataset.id, clear:true};
+    openDialog({type:'approveRoom'});
+  },
+  confirmApprove: run(async () => {
+    const a = S.approve, r = S.data.roomRequests.find(x => x.id === a.id); if (!r) return;
+    if (S.data.roomRequests.some(x => x.id !== r.id && x.status === 'approved' && overlaps(x.startAt, x.endAt, r.startAt, r.endAt)))
+      throw new Error('De kamer is in die periode al gereserveerd.');
+    // de sessie (tijden, code, bezoekers-goedkeuring, leegmaken) wordt door de database zelf toegepast als hij begint
+    await DB.updateRoomRequest(r.id, {status:'approved', clear_on_start:!!a.clear});
+    await DB.applyDueSessions().catch(() => {});
+    S.dialog = null; toast('Aanvraag goedgekeurd', 'De sessie start automatisch op het gekozen tijdstip.'); await refresh();
+  }),
+  denyRequest: run(async el => { await DB.updateRoomRequest(+el.dataset.id, {status:'denied'}); await refresh(); }),
+  deleteRequest: run(async el => { await DB.deleteRoomRequest(+el.dataset.id); await refresh(); }),
+  approveAccess: run(async el => { await DB.updateAccess(+el.dataset.id, 'approved'); await refresh(); }),
+  denyAccess: run(async el => { await DB.updateAccess(+el.dataset.id, 'denied'); await refresh(); }),
+  toggleApproval: run(async () => { await DB.updateConfig({requireApproval:!cfgNow().requireApproval}); await refresh(); }),
+  sendCodeRequest: run(async () => {
+    if (Date.now() - Number(lsGet('forgotAt', 0)) < 60000) throw new Error('Wacht even voordat je het opnieuw probeert.');
+    await DB.createCodeRequest(); lsSet('forgotAt', String(Date.now()));
+    S.dialog = null; toast('Aanvraag verstuurd', 'Beheerders met meldingen aan krijgen de code.'); render();
+  }),
+  toggleCustNotify: run(async () => {
+    if (!('Notification' in window)) { toast('Meldingen worden niet ondersteund', '', true); return; }
+    if (custNotifyOn()) lsSet('custNotify', '0');
+    else {
+      const p = await Notification.requestPermission();
+      if (p !== 'granted') { toast('Meldingen zijn geblokkeerd', 'Zet ze aan in de instellingen van je browser.', true); render(); return; }
+      const rows = await sb(`orders?device_id=eq.${enc(getDeviceId())}&status=eq.declined&select=id`);
+      lsSet('declNotified', JSON.stringify(rows.map(r => r.id))); lsSet('custNotify', '1');
+      toast('Meldingen staan aan', 'Je hoort het als een bestelling wordt geweigerd.');
+    }
+    render();
+  }),
+
+  /* horloge */
+  wDigit(el) {
+    if (S.w.err) return;
+    S.w.pin = (S.w.pin + el.dataset.d).slice(0, 4);
+    if (S.w.pin.length === 4) {
+      const pin = S.w.pin; S.w.err = false;
+      DB.checkStaffCode(pin).then(ok => {
+        if (ok) { S.w.auth = true; S.w.pin = ''; render(); }
+        else { S.w.err = true; render(); setTimeout(() => { S.w.pin = ''; S.w.err = false; render(); }, 700); }
+      }).catch(() => { S.w.pin = ''; render(); });
+    }
+    render();
+  },
+  wDelete() { if (!S.w.err) { S.w.pin = S.w.pin.slice(0, -1); render(); } },
+  wAdvance: run(async () => {
+    const o = watchOrders()[0]; if (!o || !W_NEXT[o.status]) return;
+    await DB.updateOrderStatus(o.id, W_NEXT[o.status]); await refresh();
+  }),
+};
+
+/* invoervelden → status (zonder het scherm opnieuw te tekenen, zodat het toetsenbord open blijft) */
+let trackTimer;
+const MODELS = {
+  nameDraft: v => { S.nameDraft = v; },
+  name: v => { S.name = v; S.helpName = v; if (v.trim()) lsSet('customerName', v.trim()); },
+  notes: v => { S.notes = v; },
+  feedbackText: v => { S.feedbackText = v; },
+  helpName: v => { S.helpName = v; },
+  staffCodeInput: v => { S.staffCodeInput = v.replace(/\D/g, ''); },
+  trackName: v => { S.trackName = v; clearTimeout(trackTimer); trackTimer = setTimeout(() => { S.trackQuery = S.trackName; updateTrackResults(); }, 400); },
+  editNotes: v => { S.dialog.notes = v; },
+  loginInput: (v, el) => {
+    S.loginInput = v.replace(/\D/g, '');
+    if (S.loginError) { S.loginError = false; el.classList.remove('err'); const m = $('#loginErr'); if (m) m.classList.add('hidden'); }
+  },
+  newCafeName: v => { S.newCafeName = v; },
+  newStaffCode: v => { S.newStaffCode = v.replace(/\D/g, ''); },
+  ndName: v => { S.nd.name = v; },
+  ndIcon: v => { S.nd.icon = v; },
+  declineChoice: v => { S.declineChoice = v; S.focusId = v === 'custom' ? 'declineCustom' : null; render(); },
+  declineCustom: v => { S.declineCustom = v; },
+  priceInput: v => { S.priceInput = v; },
+  mainCode: v => { S.mainCode = v; },
+  newMainCode: v => { S.newMainCode = v; },
+  rrEmail: v => { S.rr.email = v; }, rrCode: v => { S.rr.code = v.replace(/\D/g, ''); },
+  rrName: v => { S.rr.name = v; }, rrStart: v => { S.rr.start = v; }, rrEnd: v => { S.rr.end = v; },
+  rrApproval: (v, el) => { S.rr.approval = el.checked; },
+  approveClear: (v, el) => { S.approve.clear = el.checked; },
+};
+const DIS = {
+  gate: () => !S.nameDraft.trim(),
+  help: () => !S.helpName.trim(),
+  basket: () => !S.name.trim() || !S.selected.length || S.placing,
+  decline: () => !S.declineChoice || (S.declineChoice === 'custom' && !S.declineCustom.trim()),
+  login: () => !S.loginInput.length,
+  rr: () => !(S.rr && S.rr.name.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(S.rr.email.trim()) && /^\d{4}$/.test(S.rr.code) && S.rr.start && S.rr.end),
+};
+const applyDisabled = () => root.querySelectorAll('[data-dis]').forEach(b => { const f = DIS[b.dataset.dis]; if (f) b.disabled = !!f(); });
+
+/* ════════════════════════════════════════════════════════════════
+   10. TEKENEN, ROUTES EN OPSTARTEN
+   ════════════════════════════════════════════════════════════════ */
+const notFound = () => `<div class="gate"><div class="box"><div class="big">🤷</div><h2>Pagina niet gevonden</h2><p>Deze pagina bestaat niet.</p><a class="btn btn-primary btn-lg" href="#/">Naar de drankjes</a></div></div>`;
+function view() {
+  const p = S.route.path, c = S.data.config;
+  if (p === '/main') return viewMain();
+  if (p === '/staff') return viewStaff();
+  if (p === '/watch') return viewWatch();
+  if (p === '/' || p === '/track') {
+    if (!roomVisible(c) && !readSession() && !readMain()) return viewLocked();
+    if (S.nameConfirmed && !hasAccess()) return viewAccess();
+    return p === '/' ? viewHome() : viewTrack();
+  }
+  return notFound();
+}
+
+function render(resetScroll = false) {
+  if (!S.data) return;
+  const ae = document.activeElement;
+  const keep = ae && ae.id && root.contains(ae) ? {id:ae.id, s:ae.selectionStart, e:ae.selectionEnd} : null;
+  const sc = $('#scroller'), st = sc ? sc.scrollTop : 0;
+  const md = $('.modal'), mt = md ? md.scrollTop : 0;
+  root.className = S.animate ? 'anim' : ''; S.animate = false;
+  root.innerHTML = view();
+  translateDom(root);
+  const sc2 = $('#scroller'); if (sc2 && !resetScroll) sc2.scrollTop = st;
+  const md2 = $('.modal'); if (md2 && md) md2.scrollTop = mt;
+  const target = S.focusId || (keep && keep.id);
+  if (target) {
+    const el = document.getElementById(target);
+    if (el) {
+      el.focus({preventScroll:!S.focusId});
+      try { if (S.focusId) el.setSelectionRange(el.value.length, el.value.length); else if (keep && keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch {}
+    }
+  }
+  S.focusId = null; S.pendingRender = false;
+  applyDisabled();
+  lastVisible = visibleNow(); scheduleBoundary();
+}
+
+/* sluit/open de bar precies op het moment dat het tijdslot eindigt/begint, zonder verversen */
+let lastVisible = null, boundaryTimer = null;
+const visibleNow = () => (S.data && S.data.config) ? roomVisible(S.data.config) : null;
+function checkBoundary() {
+  if (!S.data || S.dragging || !['/', '/track', '/main'].includes(S.route.path)) return;
+  const v = visibleNow();
+  if (v !== null && lastVisible !== null && v !== lastVisible) render();
+}
+function scheduleBoundary() {
+  clearTimeout(boundaryTimer);
+  const c = S.data && S.data.config; if (!c) return;
+  const now = Date.now();
+  const next = [c.sessionStart, c.sessionEnd].filter(Boolean).map(Date.parse).filter(t => t > now).sort((x, y) => x - y)[0];
+  if (next && next - now < 2147000000) boundaryTimer = setTimeout(function () { checkBoundary(); scheduleBoundary(); }, next - now + 300);
+}
+function softRender() {          // voor automatische updates: nooit het typen verstoren
+  if (S.dragging) { S.pendingRender = true; return; }
+  const ae = document.activeElement;
+  if (ae && root.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) {
+    if (S.route.path === '/track' && ae.id === 'trackName') updateTrackResults(); else S.pendingRender = true;
+    return;
+  }
+  render();
+}
+let routeTok = 0;
+async function reload() {
+  if (!S.data) return;
+  const tok = routeTok;
+  let kicked = false;
+  if (S.route.path === '/staff' && S.session && S.session !== '__main__') {   // code intussen gewijzigd?
+    await verifySession(); kicked = !S.session;
+  }
+  const snap = await DB.getSnapshot(snapOpts()), sig = JSON.stringify(snap);
+  if (tok !== routeTok || (sig === S.sig && !kicked)) return;
+  S.sig = sig; S.data = snap;
+  detectNewOrders(snap); syncSession();
+  softRender();
+}
+
+function showFatal(e) {
+  root.innerHTML = `<div class="gate"><div class="box"><div class="big">📡</div><h2>Geen verbinding</h2><p>${esc(e.message)}</p><button class="btn btn-primary btn-lg" onclick="location.reload()">Opnieuw proberen</button></div></div>`;
+  translateDom(root);
+}
+
+async function onRoute() {
+  const tok = ++routeTok;
+  const h = location.hash.replace(/^#/, '') || '/';
+  const [path0, qs] = h.split('?');
+  const path = path0 || '/';
+  if (!['/', '/track', '/staff', '/watch', '/main'].includes(path)) { location.replace('#/'); return; }
+  S.route = {path, query:Object.fromEntries(new URLSearchParams(qs || ''))};
+  S.menuOpen = false; S.dialog = null;
+  try {
+    const snap = await DB.getSnapshot(snapOpts());
+    if (tok !== routeTok) return;
+    S.data = snap; S.sig = JSON.stringify(snap);
+    S.knownIds = new Set(snap.orders.map(o => o.id)); S.knownAccess = new Set((snap.access || []).map(a => a.id));
+  } catch (e) { if (tok === routeTok) showFatal(e); return; }
+  if (path === '/staff') { S.session = readSession(); await verifySession(); if (tok !== routeTok) return; }
+  if (path === '/main' && !readMain()) return go('/');
+  if (path === '/track' && !S.nameConfirmed) return go('/');
+  if (path === '/track') { S.trackName = S.route.query.name || ''; S.trackQuery = S.trackName; }
+  if (path === '/watch') S.w = {pin:'', auth:false, code:'', err:false};
+  syncSession();
+  document.title = tr(({'/':'Café Bestellingen', '/track':'Bestelling volgen', '/staff':'Medewerker', '/watch':'Horloge', '/main':'Hoofdadmin'})[path]);
+  render(true);
+  ensureAccess();
+}
+
+/* meldingen die ook werken als je niet op het dashboard bent (zolang de app open staat) */
+async function initCodeReqLast() {
+  const r = await sb('code_requests?select=id&order=id.desc&limit=1');
+  lsSet('codeReqLast', String(r.length ? r[0].id : 0));
+}
+let bgBusy = false;
+async function bgWatch() {
+  if (bgBusy || !('Notification' in window) || Notification.permission !== 'granted') return;
+  bgBusy = true;
+  try {
+    if (notifyRooms().length) {
+      const last = lsGet('codeReqLast');
+      const rows = await sb('code_requests?select=id&order=id.desc&limit=5');
+      const top = rows.length ? rows[0].id : 0;
+      if (last === null) lsSet('codeReqLast', String(top));
+      else {
+        const fresh = rows.filter(r => r.id > +last).sort((a, b) => a.id - b.id);
+        if (top > +last) lsSet('codeReqLast', String(top));
+        if (fresh.length) {
+          const name = ((await sb('config?id=eq.1&select=cafe_name'))[0] || {}).cafe_name || '';
+          const known = lsGet('notifyCode');
+          const ok = known ? await DB.checkStaffCode(known).catch(() => false) : false;
+          for (const _ of fresh) await notify('Code vergeten', ok ? `De code van ${name} is ${known}.` : `Iemand vroeg de code van ${name} op, maar deze is gewijzigd. Vraag de hoofdadmin om de code.`);
+        }
+      }
+    }
+    if (custNotifyOn()) {
+      const rows = await sb(`orders?device_id=eq.${enc(getDeviceId())}&status=eq.declined&select=id,drink,decline_reason`);
+      const seen = lsJson('declNotified', null);
+      if (seen === null) lsSet('declNotified', JSON.stringify(rows.map(r => r.id)));
+      else {
+        const fresh = rows.filter(r => !seen.includes(r.id));
+        if (fresh.length) {
+          lsSet('declNotified', JSON.stringify([...seen, ...fresh.map(r => r.id)]));
+          for (const r of fresh) await notify('Bestelling geweigerd', r.decline_reason ? `Je ${r.drink} is geweigerd: ${r.decline_reason}` : `Je ${r.drink} is geweigerd.`);
+        }
+      }
+    }
+  } catch {} finally { bgBusy = false; }
+}
+
+/* taal: bepaald door de taal/tijdzone van het apparaat (geen gegevens naar derden); handmatig wisselen kan altijd */
+function detectLang() {}
+
+/* gebeurtenissen */
+root.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if (!el || !root.contains(el)) return;
+  const fn = ACTIONS[el.dataset.a]; if (fn) fn(el, e);
+});
+root.addEventListener('input', e => {
+  const el = e.target, m = el.dataset && el.dataset.m;
+  if (m && MODELS[m]) { MODELS[m](el.value, el); applyDisabled(); }
+});
+root.addEventListener('keydown', e => {
+  const el = e.target;
+  if (e.key === 'Enter' && el.dataset && el.dataset.enter && el.tagName !== 'TEXTAREA') { e.preventDefault(); ACTIONS[el.dataset.enter](el, e); }
+  if (e.key === 'Escape') {
+    if (S.editPriceId != null) { S.editPriceId = null; render(); }
+    else if (S.dialog) { S.dialog = null; render(); }
+    else if (S.menuOpen) { S.menuOpen = false; render(); }
+  }
+});
+root.addEventListener('focusout', e => {
+  const b = e.target.dataset && e.target.dataset.blur;
+  if (b && ACTIONS[b]) ACTIONS[b](e.target, e);
+  if (S.pendingRender) setTimeout(() => {
+    const a = document.activeElement;
+    if (!(a && root.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) render();
+  }, 0);
+});
+
+/* drankjes slepen om de volgorde te wijzigen */
+let drag = null;
+root.addEventListener('pointerdown', e => {
+  const g = e.target.closest('[data-drag]'); if (!g) return;
+  const rows = [...root.querySelectorAll('#drinklist .drow')], row = g.closest('.drow'), idx = rows.indexOf(row);
+  if (idx < 0) return;
+  const rects = rows.map(r => r.getBoundingClientRect());
+  drag = {row, rows, idx, over:idx, startY:e.clientY, rects, h:rects[idx].height + 8};
+  S.dragging = true; row.classList.add('dragging'); e.preventDefault();
+});
+window.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dy = e.clientY - drag.startY;
+  drag.row.style.transform = `translateY(${dy}px)`;
+  const c = drag.rects[drag.idx].top + drag.rects[drag.idx].height / 2 + dy, last = drag.rects.length - 1;
+  let over = drag.idx;
+  drag.rects.forEach((r, i) => { if (c >= r.top && c <= r.bottom) over = i; });
+  if (c < drag.rects[0].top) over = 0;
+  if (c > drag.rects[last].bottom) over = last;
+  drag.over = over;
+  drag.rows.forEach((r, i) => {
+    if (r === drag.row) return;
+    const shift = (drag.idx < over && i > drag.idx && i <= over) ? -drag.h : (drag.idx > over && i < drag.idx && i >= over) ? drag.h : 0;
+    r.style.transform = shift ? `translateY(${shift}px)` : '';
+  });
+});
+async function endDrag(commit) {
+  if (!drag) return;
+  const {idx, over} = drag; drag = null;
+  root.querySelectorAll('#drinklist .drow').forEach(r => { r.style.transform = ''; r.classList.remove('dragging'); });
+  if (commit && over !== idx) {
+    const ids = S.data.drinks.map(d => d.id); const [m] = ids.splice(idx, 1); ids.splice(over, 0, m);
+    try { await DB.reorderDrinks(ids); } catch (err) { fail(err); }
+  }
+  S.dragging = false; await refresh();
+}
+window.addEventListener('pointerup', () => endDrag(true));
+window.addEventListener('pointercancel', () => endDrag(false));
+
+/* opstarten */
+async function boot() {
+  document.documentElement.lang = S.lang;
+  root.innerHTML = `<div class="gate"><div class="box"><div class="big">${ic('cup')}</div><p>Laden…</p></div></div>`; translateDom(root);
+  window.addEventListener('hashchange', onRoute);
+  window.addEventListener('resize', () => { if (S.route.path === '/watch') render(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    checkBoundary();
+    if (S.route.path === '/staff') {
+      const v = readSession();
+      if (!v) { clearSession(); S.session = null; render(); } else writeSession(v);
+    }
+    reload().catch(() => {});
+  });
+  let tick = 0;
+  setInterval(() => {
+    reload().catch(() => {}); bgWatch(); checkBoundary();
+    if (tick % 5 === 0) DB.applyDueSessions().catch(() => {});
+    if (++tick % 20 === 0 && S.route.path === '/' && S.data) softRender();
+  }, 3000);
+  const after = sessionStorage.getItem('toastAfter'); if (after) { sessionStorage.removeItem('toastAfter'); toast(after); }
+  detectLang();
+  DB.applyDueSessions().catch(() => {});
+  await onRoute();
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+boot();
+})();
+</script>
+</body>
+</html>
